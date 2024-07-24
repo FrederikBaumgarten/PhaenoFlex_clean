@@ -7,6 +7,7 @@
 rm(list = ls())
 
 path <- "~/Documents/ubc/year5/TemporalEcologyLab/PhaenoFlex_clean/analysis/"
+path <- "/Users/frederik/github/PhaenoFlex_clean/analysis"
 setwd(path)
 
 library(ggplot2)
