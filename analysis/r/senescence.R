@@ -10,10 +10,9 @@ path <- "~/Documents/ubc/year5/TemporalEcologyLab/PhaenoFlex_clean/analysis/"
 path <- "/Users/frederik/github/PhaenoFlex_clean/analysis"
 setwd(path)
 
-library(ggplot2)
-library(gridExtra)
+
 library(readxl)
-library(dplyr)
+
 # Load----------------------------------------------------------------
 d.a <- read_excel("input/senescence/senescence_Amax.xlsx")
 d.other <- read_excel("input/senescence/senescence_5_Sept_FB.xlsx", sheet = "percentage")
@@ -35,30 +34,29 @@ subset_data <- function(species, a, index, percen, CCI) {
 }
 
 species_list <- c("Prvi", "Acma", "Bepa", "Quma")
-data_list <- lapply(species_list, subset_data, a = d.a, index = d.index, percen = d.percent, CCI = d.cci)
+data_list <- lapply(species_list, subset_data, a = d.a, index = d.index, percen = d.percent, CCI = d.cci) #subset the full data into lists according to species and type of measurment
 
 
 ##cleaning ----------------------------------------------------------
 #create a data frame with 6 columns: id, species, treatment, doy, value, and type
-###prvi--------------------------------------------------------------
-d.cleaned <- data.frame(matrix(data = NA, ncol = 5, nrow = 0))
-for (i in 1:length(data_list)){
+d.cleaned <- data.frame(matrix(data = NA, ncol = 5, nrow = 0)) #create a empty dataframe to store the cleaned data 
+for (i in 1:length(data_list)){ #a loop to extract doy and values for tyep "A"
   list <- data_list[[i]]
   for (n in 1:nrow(list[["raw_A"]])){
     data <- list[["raw_A"]]
-    A <- t(data[n, c(7:19)]) #transpose
+    A <- t(data[n, c(7:19)]) #select value columns and transpose them so that value will be in a single column 
     print(A)
-    doy <- colnames(data)[7:19]
-    d.temp <- data.frame((matrix(data = NA, ncol = 0, nrow = length(doy))))
+    doy <- colnames(data)[7:19] #select doy values from column names of the xlsx file
+    d.temp <- data.frame((matrix(data = NA, ncol = 0, nrow = length(doy)))) #create a temp dataframe
     d.temp$id <- data$tree_ID[n]
     d.temp$species <- data$spec[n]
     d.temp$treatment <- data$drought_timing[n]
     d.temp$doy <- as.numeric(doy)
     d.temp$value <- A[1:13]
     d.temp$type <- "A"
-    d.cleaned <- rbind(d.cleaned, d.temp)
+    d.cleaned <- rbind(d.cleaned, d.temp) #append temp to d.cleaned dataframe
   }
-  for (n in 1:nrow(list[["CCI"]])){
+  for (n in 1:nrow(list[["CCI"]])){ #a loop to extract doy and values for tyep "CCI" (same structure as above)
     data <- list[["CCI"]]
     CCI <- t(data[n, c(5:13)]) #transpose
     doy <- sub("_CCI", "", colnames(data)[grepl("CCI", colnames(data))])
@@ -71,7 +69,7 @@ for (i in 1:length(data_list)){
     d.temp$type <- "CCI"
     d.cleaned <- rbind(d.cleaned, d.temp)
   }
-  for (n in 1:nrow(list[["percen"]])){
+  for (n in 1:nrow(list[["percen"]])){ #a loop to extract doy and values for tyep "PERC" (same structure as above)
     data <- list[["percen"]]
     P <- t(data[n, c(5:13)]) #transpose
     doy <- sub("_PERC", "", colnames(data)[grepl("PERC", colnames(data))])
@@ -87,7 +85,8 @@ for (i in 1:length(data_list)){
 }
 d.cleaned$value <- as.numeric(d.cleaned$value)
 #preliminary plots--------------------------------------------------
-colors <- rainbow(length(unique(d.cleaned$type)))
+#plotting to see the original data
+colors <- rainbow(length(unique(d.cleaned$type))) 
 names(colors) <- unique(d.cleaned$type)
 
 for (spec in species_list){
@@ -109,7 +108,7 @@ for (spec in species_list){
     axis(1, at = seq(216, 304, by = 10), cex.axis = 0.7)
     axis(2, at = seq(0, 100, by = 10), cex.axis = 0.7)
     par(new = TRUE)
-    plot(secondary$doy, secondary$value, col = "red",
+    plot(secondary$doy, secondary$value, col = "red", #plotting secondary axis (A)
          pch = 16, axes = FALSE, xlab = "", ylab = "",
          xlim = c(216, 304), ylim = c(0, 10))
     axis(4, at = seq(0, 10, by = 1), col = "red", col.axis = "red")
@@ -122,6 +121,7 @@ for (spec in species_list){
 par(mfrow = c(1, 1))
 
 ## Logistic function for senescence data-----------------------------
+# code from Fredi back in November 2023
 senes_sim <- function(t, a, b, c) {
   y <- a / (1 + exp((t - b) / c)) + rnorm(length(t), 0, 0.5) # logistic function with noise
   return(y)
@@ -158,22 +158,22 @@ for (i in 1:length(unique(d.A$id))){
   rep <- unique(d.A$id)[i]
   d <- subset(d.A, d.A$id == rep)
   fit.dat <- data.frame(value = d$value, time = d$doy)
-  fit <- tryCatch({
+  fit <- tryCatch({ #fit the nls to each rep, and writes out data id if there's error
     nls(value ~ SSlogis(time, a,b,c), data = fit.dat)
   }, error = function (e){
     cat("Error in fitting for id:", rep, "\nError message:", e$message, "Skipping. \n")
     return(NULL)
   })
-  if (!is.null(fit)) {
-    b_value <- coef(fit)['b']
-    fits.list.A[[paste0(rep, "_fit_A")]] <- fit
+  if (!is.null(fit)) { #if the data fit successfully store the slope to the data frame
+    b_value <- coef(fit)['b'] # extract slope from the fitted curve
+    fits.list.A[[paste0(rep, "_fit_A")]] <- fit #save fit into the list 
     temp <- data.frame(matrix(data = NA, ncol = 0, nrow = 1))
     temp$species <- unique(d$species[which(d$id == rep)])
     temp$treatment <- unique(d$treatment[which(d$id == rep)])
     temp$id <- rep
     temp$b <- b_value
     temp$type <- "A"
-    d.all <- rbind(d.all, temp)
+    d.all <- rbind(d.all, temp) #append b to the big dataframe
   }
 }
 ##CCI
@@ -231,8 +231,8 @@ for (i in 1:length(unique(d.P$id))){
   }
 }
 #
-# Write a function to extract quantiles
-logistic_quantile <- function(params, percent) {
+# Write a function to extract the doy for the perce
+standardization <- function(params, percent) {
   a <- params["a"]
   b <- params["b"]
   c <- params["c"]
@@ -240,7 +240,7 @@ logistic_quantile <- function(params, percent) {
   doy <- b - c * log((a / value) - 1)
   return(doy)
 }
-# extrac_params
+# extrac_paramegters from a fit 
 extract_params <- function(fit) {
   coef(fit)
 }
@@ -257,9 +257,9 @@ for (i in 1:nrow(d.all)){
       fit <- fits.list.A[[fit_index[1]]]  # Use the first match
       # Continue with your processing using the fit
       params <- extract_params(fit)
-      d.all$doy10[which(d.all$id == rep & d.all$type == "A")] <- logistic_quantile(params, 0.1)
-      d.all$doy50[which(d.all$id == rep & d.all$type == "A")] <- logistic_quantile(params, 0.5)
-      d.all$doy90[which(d.all$id == rep & d.all$type == "A")] <- logistic_quantile(params, 0.9)
+      d.all$doy10[which(d.all$id == rep & d.all$type == "A")] <- standardization(params, 0.1)
+      d.all$doy50[which(d.all$id == rep & d.all$type == "A")] <- standardization(params, 0.5)
+      d.all$doy90[which(d.all$id == rep & d.all$type == "A")] <- standardization(params, 0.9)
     } else {
       cat("Fit not found for id:", rep, "in fits.list.A\n")
     }
@@ -269,9 +269,9 @@ for (i in 1:nrow(d.all)){
     if (length(fit_index) > 0) {
       fit <- fits.list.C[[fit_index[1]]]  # Use the first match
       params <- extract_params(fit)
-      d.all$doy10[which(d.all$id == rep & d.all$type == "CCI")] <- logistic_quantile(params, 0.1)
-      d.all$doy50[which(d.all$id == rep & d.all$type == "CCI")] <- logistic_quantile(params, 0.5)
-      d.all$doy90[which(d.all$id == rep & d.all$type == "CCI")] <- logistic_quantile(params, 0.9)
+      d.all$doy10[which(d.all$id == rep & d.all$type == "CCI")] <- standardization(params, 0.1)
+      d.all$doy50[which(d.all$id == rep & d.all$type == "CCI")] <- standardization(params, 0.5)
+      d.all$doy90[which(d.all$id == rep & d.all$type == "CCI")] <- standardization(params, 0.9)
       
     } else {
       cat("Fit not found for id:", rep, "in fits.list.C\n")
@@ -282,9 +282,9 @@ for (i in 1:nrow(d.all)){
     if (length(fit_index) > 0) {
       fit <- fits.list.P[[fit_index[1]]]  # Use the first match
       params <- extract_params(fit)
-      d.all$doy10[which(d.all$id == rep & d.all$type == "Percentage")] <- logistic_quantile(params, 0.1)
-      d.all$doy50[which(d.all$id == rep & d.all$type == "Percentage")] <- logistic_quantile(params, 0.5)
-      d.all$doy90[which(d.all$id == rep & d.all$type == "Percentage")] <- logistic_quantile(params, 0.9)
+      d.all$doy10[which(d.all$id == rep & d.all$type == "Percentage")] <- standardization(params, 0.1)
+      d.all$doy50[which(d.all$id == rep & d.all$type == "Percentage")] <- standardization(params, 0.5)
+      d.all$doy90[which(d.all$id == rep & d.all$type == "Percentage")] <- standardization(params, 0.9)
     } else {
       cat("Fit not found for id:", rep, "in fits.list.P\n")
     }
@@ -305,7 +305,7 @@ treatment_group <- lapply(treatment_group, function(sub_df) {
 standard_error <- function(x) {
   sd(x) / sqrt(length(x))
 }
-trmt_spec_summary <- data.frame(matrix(data = NA, nrow = 0, ncol = 5))
+trmt_spec_summary <- data.frame(matrix(data = NA, nrow = 0, ncol = 5)) #create a data frame for mean and sd for each species + treatment combination 
 for (i in 1:length(names(treatment_group))){
   d.spec <- treatment_group[[i]]
   for (n in 1:length(names(d.spec))){
@@ -360,13 +360,14 @@ for (i in 1:nrow(d.specwise)){
   rep <- d.aspecwise$id[i]
   fit <- fits.list.spec[[i]]
   params <- extract_params(fit)
-  d.specwise$quantile10[which(d.all$id == rep & d.all$type == "A")] <- logistic_quantile(params, 0.1)
-  d.specwise$quantile50[which(d.all$id == rep & d.all$type == "A")] <- logistic_quantile(params, 0.5)
-  d.specwise$quantile90[which(d.all$id == rep & d.all$type == "A")] <- logistic_quantile(params, 0.9)
+  d.specwise$quantile10[which(d.all$id == rep & d.all$type == "A")] <- standardization(params, 0.1)
+  d.specwise$quantile50[which(d.all$id == rep & d.all$type == "A")] <- standardization(params, 0.5)
+  d.specwise$quantile90[which(d.all$id == rep & d.all$type == "A")] <- standardization(params, 0.9)
 
 }
 
 #plotting one curve for each species
+#TODO - how to present the data (Which fit to present?)
 for (i in 1: length(species_list)){
   spec <- species_list[i]
   filenameA <- paste0("output/senescence_plots/", spec, "_A_plot.png")
