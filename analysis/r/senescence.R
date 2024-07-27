@@ -6,11 +6,11 @@
 # Housekeeping
 rm(list = ls())
 
-path <- "~/Documents/ubc/year5/TemporalEcologyLab/PhaenoFlex_clean/analysis/"
-path <- "/Users/frederik/github/PhaenoFlex_clean/analysis"
-setwd(path)
-
-
+if(length(grep("britanywuuu", getwd()) > 0)) {
+  setwd("/Users/britanywuuu/UBC/tel/PhaenoFlex_clean/analysis")
+} else if(length(grep("frederik", getwd()) > 0)) {
+  setwd("/Users/frederik/github/PhaenoFlex_clean/analysis")
+}
 library(readxl)
 
 # Load----------------------------------------------------------------
@@ -35,7 +35,6 @@ subset_data <- function(species, a, index, percen, CCI) {
 
 species_list <- c("Prvi", "Acma", "Bepa", "Quma")
 data_list <- lapply(species_list, subset_data, a = d.a, index = d.index, percen = d.percent, CCI = d.cci) #subset the full data into lists according to species and type of measurment
-
 
 ##cleaning ----------------------------------------------------------
 #create a data frame with 6 columns: id, species, treatment, doy, value, and type
@@ -84,21 +83,22 @@ for (i in 1:length(data_list)){ #a loop to extract doy and values for tyep "A"
   }
 }
 d.cleaned$value <- as.numeric(d.cleaned$value)
+head(d.cleaned)
 #preliminary plots--------------------------------------------------
 #plotting to see the original data
 colors <- rainbow(length(unique(d.cleaned$type))) 
 names(colors) <- unique(d.cleaned$type)
 
 for (spec in species_list){
-  file <-file.path(paste0("output/senescence_plots/", spec, "_rawplot", ".pdf"))
+  file <-file.path(paste0("output/", spec, "Rawplot", ".pdf"))
   pdf(file, width = 25, height = 10)
   par(mfrow = c(2, 5), mar = c(5, 2, 2, 4), oma = c(2, 2, 4, 2))
   data <- subset(d.cleaned, d.cleaned$species == spec)
   for (trmt in unique(data$treatment)){
     trmt_data <- subset(data, treatment == trmt)
-    primary <- subset(trmt_data, type != "A")
-    secondary <- subset(trmt_data, type == "A")
-    plot(primary$doy, primary$value, col = colors[primary$type],
+    primary <- subset(trmt_data, type == "Percentage")
+    secondary <- subset(trmt_data, type != "Percentage")
+    plot(primary$doy, primary$value,
          pch = 16, xlab = "DOY", ylab = "",
          xlim = c(216, 304), ylim = c(0, 100),
          main = paste(trmt),
@@ -108,7 +108,7 @@ for (spec in species_list){
     axis(1, at = seq(216, 304, by = 10), cex.axis = 0.7)
     axis(2, at = seq(0, 100, by = 10), cex.axis = 0.7)
     par(new = TRUE)
-    plot(secondary$doy, secondary$value, col = "red", #plotting secondary axis (A)
+    plot(secondary$doy, secondary$value, col = colors[secondary$type], #plotting secondary axis (A and CCI)
          pch = 16, axes = FALSE, xlab = "", ylab = "",
          xlim = c(216, 304), ylim = c(0, 10))
     axis(4, at = seq(0, 10, by = 1), col = "red", col.axis = "red")
@@ -118,7 +118,6 @@ for (spec in species_list){
   mtext(paste(spec), side = 3, outer = TRUE, line = 1, cex = 1.5)
   dev.off()
 } 
-par(mfrow = c(1, 1))
 
 ## Logistic function for senescence data-----------------------------
 # code from Fredi back in November 2023
@@ -133,23 +132,30 @@ b <- 180    # the day when the cholorophyll concentration decrease is the fastes
 c <- 5      # controls the rate of decrease
 
 # Generate x values
-t <- seq(150, 210) # time: day of the year from a selected start and end date
+t <- seq(150, 310) # time: day of the year from a selected start and end date #note 2024 July 25th: the upper limit should be ~310
 
 # Simulate senescence process using a logistic function
 y <- senes_sim(t, a, b, c)
 # Plot the simulated data senescence process
-png("output/senescence_plots/simulated.png")
+png("output/simulatedSenescence.png")
 plot(t, y, type = "l", xlab = "Day of the year", ylab = "A",
      main = "Senescence process of deciduous trees in autumn")
 dev.off()
 #Fit data to SSlogis using simulated data 
 dat<-data.frame(values= y, time= t) #create data frame with simulated data
 fit <- nls(values ~ SSlogis(time, a, b, c), data = dat)
+png("output/simulatedSenescenceFit.png")
+plot(t,y, type = "l", xlab = "Day of the year", ylab = "A",
+  main = "Senescence process of deciduous trees in autumn")
+curve(predict(fit, newdata = data.frame(time = x), se = FALSE), 
+        add = TRUE, col = "red")
+dev.off()
 summary(fit)
+#plot the fit on the simulated data
 
 ### Fit data to SSlogis----------------------------------------------
 ###Amax
-d.all <- data.frame(matrix(data = NA, ncol = 4, nrow = 0 )) # create a dataframe for all the slopes
+d.all <- data.frame(matrix(data = NA, ncol = 4, nrow = 0 )) # create a dataframe for all the slopes #2024 July 25th: extract also a and c into d.all
 fits.list.A <- list() # create a list to store fit for each rep
 d.A <- subset(d.cleaned, type == "A")
 d.A$value <- as.numeric(d.A$value)
@@ -164,14 +170,18 @@ for (i in 1:length(unique(d.A$id))){
     cat("Error in fitting for id:", rep, "\nError message:", e$message, "Skipping. \n")
     return(NULL)
   })
-  if (!is.null(fit)) { #if the data fit successfully store the slope to the data frame
-    b_value <- coef(fit)['b'] # extract slope from the fitted curve
+  if (!is.null(fit)) { #if the data fit successfully store the coefficients to the data frame
+    a_value <- coef(fit)['a']
+    b_value <- coef(fit)['b']
+    c_value <- coef(fit)['c']
     fits.list.A[[paste0(rep, "_fit_A")]] <- fit #save fit into the list 
     temp <- data.frame(matrix(data = NA, ncol = 0, nrow = 1))
     temp$species <- unique(d$species[which(d$id == rep)])
     temp$treatment <- unique(d$treatment[which(d$id == rep)])
     temp$id <- rep
+    temp$a <- a_value
     temp$b <- b_value
+    temp$c <- c_value
     temp$type <- "A"
     d.all <- rbind(d.all, temp) #append b to the big dataframe
   }
@@ -192,13 +202,17 @@ for (i in 1:length(unique(d.C$id))){
     return(NULL)
   })
   if (!is.null(fit)) {
-    b_value <- coef(fit)['b'] # extract slope from the fitted curve
+    a_value <- coef(fit)['a']
+    b_value <- coef(fit)['b']
+    c_value <- coef(fit)['c']
     fits.list.C[[paste0(rep, "_fit_C")]] <- fit #save fit into the list 
     temp <- data.frame(matrix(data = NA, ncol = 0, nrow = 1))
     temp$species <- unique(d$species[which(d$id == rep)])
     temp$treatment <- unique(d$treatment[which(d$id == rep)])
     temp$id <- rep
+    temp$a <- a_value
     temp$b <- b_value
+    temp$c <- c_value
     temp$type <- "CCI"
     d.all <- rbind(d.all, temp) #append b to the big dataframe
   }
@@ -219,13 +233,17 @@ for (i in 1:length(unique(d.P$id))){
     return(NULL)
   })
   if (!is.null(fit)) {
+    a_value <- coef(fit)['a']
     b_value <- coef(fit)['b']
+    c_value <- coef(fit)['c']
     fits.list.P[[paste0(rep, "_fit_P")]] <- fit
     temp <- data.frame(matrix(data = NA, ncol = 0, nrow = 1))
     temp$species <- unique(d$species[which(d$id == rep)])
     temp$treatment <- unique(d$treatment[which(d$id == rep)])
     temp$id <- rep
+    temp$a <- a_value
     temp$b <- b_value
+    temp$c <- c_value
     temp$type <- "Percentage"
     d.all <- rbind(d.all, temp)
   }
@@ -244,9 +262,9 @@ standardization <- function(params, percent) {
 extract_params <- function(fit) {
   coef(fit)
 }
-d.all$ten <- NA
-d.all$fifty <- NA
-d.all$ninty <- NA
+d.all$per10 <- NA
+d.all$per50 <- NA
+d.all$per90 <- NA
 
 # extract doy for 10%, 50% and 90% senescence
 for (i in 1:nrow(d.all)){
@@ -257,9 +275,9 @@ for (i in 1:nrow(d.all)){
       fit <- fits.list.A[[fit_index[1]]]  # Use the first match
       # Continue with your processing using the fit
       params <- extract_params(fit)
-      d.all$doy10[which(d.all$id == rep & d.all$type == "A")] <- standardization(params, 0.1)
-      d.all$doy50[which(d.all$id == rep & d.all$type == "A")] <- standardization(params, 0.5)
-      d.all$doy90[which(d.all$id == rep & d.all$type == "A")] <- standardization(params, 0.9)
+      d.all$per10[which(d.all$id == rep & d.all$type == "A")] <- standardization(params, 0.1)
+      d.all$per50[which(d.all$id == rep & d.all$type == "A")] <- standardization(params, 0.5)
+      d.all$per90[which(d.all$id == rep & d.all$type == "A")] <- standardization(params, 0.9)
     } else {
       cat("Fit not found for id:", rep, "in fits.list.A\n")
     }
@@ -269,9 +287,9 @@ for (i in 1:nrow(d.all)){
     if (length(fit_index) > 0) {
       fit <- fits.list.C[[fit_index[1]]]  # Use the first match
       params <- extract_params(fit)
-      d.all$doy10[which(d.all$id == rep & d.all$type == "CCI")] <- standardization(params, 0.1)
-      d.all$doy50[which(d.all$id == rep & d.all$type == "CCI")] <- standardization(params, 0.5)
-      d.all$doy90[which(d.all$id == rep & d.all$type == "CCI")] <- standardization(params, 0.9)
+      d.all$per10[which(d.all$id == rep & d.all$type == "CCI")] <- standardization(params, 0.1)
+      d.all$per50[which(d.all$id == rep & d.all$type == "CCI")] <- standardization(params, 0.5)
+      d.all$per90[which(d.all$id == rep & d.all$type == "CCI")] <- standardization(params, 0.9)
       
     } else {
       cat("Fit not found for id:", rep, "in fits.list.C\n")
@@ -282,9 +300,9 @@ for (i in 1:nrow(d.all)){
     if (length(fit_index) > 0) {
       fit <- fits.list.P[[fit_index[1]]]  # Use the first match
       params <- extract_params(fit)
-      d.all$doy10[which(d.all$id == rep & d.all$type == "Percentage")] <- standardization(params, 0.1)
-      d.all$doy50[which(d.all$id == rep & d.all$type == "Percentage")] <- standardization(params, 0.5)
-      d.all$doy90[which(d.all$id == rep & d.all$type == "Percentage")] <- standardization(params, 0.9)
+      d.all$per10[which(d.all$id == rep & d.all$type == "Percentage")] <- standardization(params, 0.1)
+      d.all$per50[which(d.all$id == rep & d.all$type == "Percentage")] <- standardization(params, 0.5)
+      d.all$per90[which(d.all$id == rep & d.all$type == "Percentage")] <- standardization(params, 0.9)
     } else {
       cat("Fit not found for id:", rep, "in fits.list.P\n")
     }
@@ -293,9 +311,18 @@ for (i in 1:nrow(d.all)){
   }
 }
 
+## export the summary table for each individual
+write.csv(d.all, "output/repsummary.csv")
+head(d.all)
 #summary data (Q10, Q50, Q90, and b) for each treatment in each species 
 #should I separate by each metrics? Maybe...
-treatment_group <- split(d.all, d.all$species)
+#try tapply() function 
+# treatment_group <- split(d.all, d.all$species) The end format isn't pleasing
+# trmt <- d.all$treatment
+# type <- d.all$type
+# species <- d.all$species
+# per10 <- d.all$per10
+# per10_mean <- tapply(per10, list(species, trmt, type), mean)
 treatment_group <- lapply(treatment_group, function(sub_df) {
   treatment_group <- split(sub_df, sub_df$treatment)
   lapply(treatment_group, function(type_df){
@@ -305,7 +332,7 @@ treatment_group <- lapply(treatment_group, function(sub_df) {
 standard_error <- function(x) {
   sd(x) / sqrt(length(x))
 }
-trmt_spec_summary <- data.frame(matrix(data = NA, nrow = 0, ncol = 5)) #create a data frame for mean and sd for each species + treatment combination 
+d.summary <- data.frame(matrix(data = NA, nrow = 0, ncol = 5)) #create a data frame for mean and sd for each species + treatment combination 
 for (i in 1:length(names(treatment_group))){
   d.spec <- treatment_group[[i]]
   for (n in 1:length(names(d.spec))){
@@ -315,74 +342,44 @@ for (i in 1:length(names(treatment_group))){
       temp <- data.frame(matrix(data = NA, ncol = 0, nrow = 1))
       temp$species <- unique(data$species)
       temp$trmt <- unique(data$treatment)
+      temp$a <- mean(data$a)
+      temp$ase <- standard_error(data$a)
       temp$b <- mean(data$b)
-      temp$Q10 <- mean(data$doy10)
-      temp$Q10se <- standard_error(data$doy10)
-      temp$Q50 <- mean(data$doy50)
-      temp$Q50se <- standard_error(data$doy50)
-      temp$Q90 <- mean(data$doy90)
-      temp$Q90se <- standard_error(data$doy90)
+      temp$bse <- standard_error(data$b)
+      temp$c <- mean(data$c)
+      temp$cse <- standard_error(data$c)
+      temp$per10mean <- mean(data$per10)
+      temp$per10se <- standard_error(data$per10)
+      temp$per50mean <- mean(data$per10)
+      temp$per50se <- standard_error(data$per50)
+      temp$per90mean <- mean(data$per90)
+      temp$per90se <- standard_error(data$per90)
       temp$type <- unique(data$type)
-      trmt_spec_summary <- rbind(trmt_spec_summary, temp)
+      d.summary <- rbind(d.summary, temp)
     }
   }
 }
-# general fit for each species
-spec_list <- split(d.cleaned, d.cleaned$species)
-d.specwise <- data.frame(matrix(data = NA, ncol = 3, nrow = 0 ))
-fits.list.spec <- list()
-for (i in 1:length(unique(d.cleaned$species))){
-  name <- unique(d.cleaned$species)[i]
-  d.species <- subset(d.cleaned, d.cleaned$species == name)
-  for (n in 1:length(unique(d.species$type))){
-    metric <- unique(d.species$type)[n]
-    d <- subset(d.species, d.species$type == metric)
-    fit.dat <- data.frame(value = d$value, time = d$doy)
-    fit <- tryCatch({
-      nls(value ~ SSlogis(time, a,b,c), data = fit.dat)
-    }, error = function (e){
-      cat("Error in fitting for", name, metric, "\nError message:", e$message, "Skipping. \n")
-      return(NULL)
-    })
-    if (!is.null(fit)) {
-      b_value <- coef(fit)['b']
-      fits.list.spec[[paste0(name, "_fit_", metric)]] <- fit
-      temp <- data.frame(matrix(data = NA, ncol = 0, nrow = 1))
-      temp$species <- name
-      temp$b <- b_value
-      temp$type <- metric
-      d.specwise <- rbind(d.specwise, temp)
-    }
-  }
-}
-
-for (i in 1:nrow(d.specwise)){
-  rep <- d.aspecwise$id[i]
-  fit <- fits.list.spec[[i]]
-  params <- extract_params(fit)
-  d.specwise$quantile10[which(d.all$id == rep & d.all$type == "A")] <- standardization(params, 0.1)
-  d.specwise$quantile50[which(d.all$id == rep & d.all$type == "A")] <- standardization(params, 0.5)
-  d.specwise$quantile90[which(d.all$id == rep & d.all$type == "A")] <- standardization(params, 0.9)
-
-}
+# export summary table for each treatmenrt + species
+write.csv(d.summary, "output/treatmentFitSummary.csv")
 
 #plotting one curve for each species
 #TODO - how to present the data (Which fit to present?)
 for (i in 1: length(species_list)){
   spec <- species_list[i]
-  filenameA <- paste0("output/senescence_plots/", spec, "_A_plot.png")
+  filenameA <- paste0("output/", spec, "PlotA.png")
   png(filenameA)
-  plot(d.cleaned$doy[which(d.cleaned$species == spec & d.cleaned$type == "A")], 
-       d.cleaned$value[which(d.cleaned$species == spec & d.cleaned$type == "A")], 
+  plot(d.summary$treatment[which(d.summary$species == spec & d.summary$type == "A")], 
+       d.cleaned$per10[which(d.summary$species == spec & d.summary$type == "A")], 
        xlab = "Time (doy)", ylab = "Value (A)", 
        pch = 16, col = "blue")
-  fitnameA <- paste0(spec, "_fit_A")
-  curve(predict(fits.list.spec[[fitnameA]], newdata = data.frame(time = x), se = FALSE), 
-        add = TRUE, col = "blue4")
+  arrows(d.summary$treatment[which(d.summary$species == spec & d.summary$type == "A")],
+    d.cleaned$per10[which(d.summary$species == spec & d.summary$type == "A")] - d.summary$per10se[which(d.summary$species == spec & d.summary$type == "A")], 
+    d.cleaned$per10[which(d.summary$species == spec & d.summary$type == "A")] + d.summary$per10se[which(d.summary$species == spec & d.summary$type == "A")], 
+    angle = 90, code = 3, length = 0.1)
   title(spec)
   dev.off()
 }
-png("output/senescence_plots/A_plot.png")
+png("output/A_plot.png")
 plot(d.cleaned$doy[which(d.cleaned$species == "Prvi" & d.cleaned$type == "A")], 
      d.cleaned$value[which(d.cleaned$species == "Prvi" & d.cleaned$type == "A")], 
      xlab = "Time (doy)", ylab = "Value (A)", 
