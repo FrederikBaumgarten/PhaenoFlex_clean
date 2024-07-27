@@ -317,7 +317,7 @@ head(d.all)
 #summary data (Q10, Q50, Q90, and b) for each treatment in each species 
 #should I separate by each metrics? Maybe...
 #try tapply() function 
-# treatment_group <- split(d.all, d.all$species) The end format isn't pleasing
+treatment_group <- split(d.all, d.all$species) #The end format isn't pleasing
 # trmt <- d.all$treatment
 # type <- d.all$type
 # species <- d.all$species
@@ -350,7 +350,7 @@ for (i in 1:length(names(treatment_group))){
       temp$cse <- standard_error(data$c)
       temp$per10mean <- mean(data$per10)
       temp$per10se <- standard_error(data$per10)
-      temp$per50mean <- mean(data$per10)
+      temp$per50mean <- mean(data$per50)
       temp$per50se <- standard_error(data$per50)
       temp$per90mean <- mean(data$per90)
       temp$per90se <- standard_error(data$per90)
@@ -362,35 +362,62 @@ for (i in 1:length(names(treatment_group))){
 # export summary table for each treatmenrt + species
 write.csv(d.summary, "output/treatmentFitSummary.csv")
 
-#plotting one curve for each species
-#TODO - how to present the data (Which fit to present?)
+##plotting-------------------------------------------------
+#treatment as x-axis
+#A
 for (i in 1: length(species_list)){
   spec <- species_list[i]
+  df <- subset(d.summary, d.summary$species == spec & d.summary$type == "A")
   filenameA <- paste0("output/", spec, "PlotA.png")
+
   png(filenameA)
-  plot(d.summary$treatment[which(d.summary$species == spec & d.summary$type == "A")], 
-       d.cleaned$per10[which(d.summary$species == spec & d.summary$type == "A")], 
-       xlab = "Time (doy)", ylab = "Value (A)", 
-       pch = 16, col = "blue")
-  arrows(d.summary$treatment[which(d.summary$species == spec & d.summary$type == "A")],
-    d.cleaned$per10[which(d.summary$species == spec & d.summary$type == "A")] - d.summary$per10se[which(d.summary$species == spec & d.summary$type == "A")], 
-    d.cleaned$per10[which(d.summary$species == spec & d.summary$type == "A")] + d.summary$per10se[which(d.summary$species == spec & d.summary$type == "A")], 
-    angle = 90, code = 3, length = 0.1)
-  title(spec)
+  plot(1, type = "n", xlim = c(1, length(unique(df$trmt))), 
+    ylim = c(min(df$per90mean) - 20 , max(df$per10mean) + 20),
+    xaxt = "n", xlab = "Treatment", ylab = "doy", main = paste("Doy of the % decrese in Amax value for each treatment of", spec))
+  axis(1, at = 1:length(unique(df$trmt)), labels = unique(df$trmt))
+  points(as.factor(df$trmt), df$per10mean, pch = 19, col = "red")
+  points(as.factor(df$trmt), df$per50mean, pch = 19, col = "blue")
+  points(as.factor(df$trmt), df$per90mean, pch = 19, col = "green")
+  arrows(as.numeric((as.factor(df$trmt))), df$per10mean - df$per10se, as.numeric((as.factor(df$trmt))), df$per10mean + df$per10se, angle = 90, code = 3, length = 0.1)
+  arrows(as.numeric((as.factor(df$trmt))), df$per50mean - df$per50se, as.numeric((as.factor(df$trmt))), df$per50mean + df$per50se, angle = 90, code = 3, length = 0.1)
+  arrows(as.numeric((as.factor(df$trmt))), df$per90mean - df$per90se, as.numeric((as.factor(df$trmt))), df$per90mean + df$per90se, angle = 90, code = 3, length = 0.1)
   dev.off()
 }
-png("output/A_plot.png")
-plot(d.cleaned$doy[which(d.cleaned$species == "Prvi" & d.cleaned$type == "A")], 
-     d.cleaned$value[which(d.cleaned$species == "Prvi" & d.cleaned$type == "A")], 
-     xlab = "Time (doy)", ylab = "Value (A)", 
-     pch = 16, col = "blue")
-plot(d.cleaned$doy[which(d.cleaned$species == "Prvi" & d.cleaned$type == "Percentage")],
-     d.cleaned$value[which(d.cleaned$species == "Prvi" & d.cleaned$type == "Percentage")],
-     xlab = "Time (doy)", ylab = "Value (A)",
-     pch = 16, col = "red")
-curve(predict(fits.list.spec[["Prvi_fit_A"]], newdata = data.frame(time = x), se = FALSE), 
-      add = TRUE, col = "blue4")
-curve(predict(fits.list.spec[["Prvi_fit_Percentage"]], newdata = data.frame(time = x), se = FALSE),
-      add = TRUE, col = "red4")
-title("Prvi")
-dev.off()
+#Perc
+for (i in 1: length(species_list)){
+  spec <- species_list[i]
+  df <- subset(d.summary, d.summary$species == spec & d.summary$type == "Percentage")
+  filenameA <- paste0("output/", spec, "PlotPerc.png")
+
+  png(filenameA)
+  plot(1, type = "n", xlim = c(1, length(unique(df$trmt))), 
+    ylim = c(min(df$per90mean) - 20 , max(df$per10mean) + 20),
+    xaxt = "n", xlab = "Treatment", ylab = "doy", main = paste("Doy of the % decrese in Amax value for each treatment of", spec))
+  axis(1, at = 1:length(unique(df$trmt)), labels = unique(df$trmt))
+  points(as.factor(df$trmt), df$per10mean, pch = 19, col = "red")
+  points(as.factor(df$trmt), df$per50mean, pch = 19, col = "blue")
+  points(as.factor(df$trmt), df$per90mean, pch = 19, col = "green")
+  arrows(as.numeric((as.factor(df$trmt))), df$per10mean - df$per10se, as.numeric((as.factor(df$trmt))), df$per10mean + df$per10se, angle = 90, code = 3, length = 0.1)
+  arrows(as.numeric((as.factor(df$trmt))), df$per50mean - df$per50se, as.numeric((as.factor(df$trmt))), df$per50mean + df$per50se, angle = 90, code = 3, length = 0.1)
+  arrows(as.numeric((as.factor(df$trmt))), df$per90mean - df$per90se, as.numeric((as.factor(df$trmt))), df$per90mean + df$per90se, angle = 90, code = 3, length = 0.1)
+  dev.off()
+}
+#CCI
+for (i in 1: length(species_list)){
+  spec <- species_list[i]
+  df <- subset(d.summary, d.summary$species == spec & d.summary$type == "CCI")
+  filenameA <- paste0("output/", spec, "PlotCCI.png")
+
+  png(filenameA)
+  plot(1, type = "n", xlim = c(1, length(unique(df$trmt))), 
+    ylim = c(min(df$per90mean) - 20 , max(df$per10mean) + 20),
+    xaxt = "n", xlab = "Treatment", ylab = "doy", main = paste("Doy of the % decrese in Amax value for each treatment of", spec))
+  axis(1, at = 1:length(unique(df$trmt)), labels = unique(df$trmt))
+  points(as.factor(df$trmt), df$per10mean, pch = 19, col = "red")
+  points(as.factor(df$trmt), df$per50mean, pch = 19, col = "blue")
+  points(as.factor(df$trmt), df$per90mean, pch = 19, col = "green")
+  arrows(as.numeric((as.factor(df$trmt))), df$per10mean - df$per10se, as.numeric((as.factor(df$trmt))), df$per10mean + df$per10se, angle = 90, code = 3, length = 0.1)
+  arrows(as.numeric((as.factor(df$trmt))), df$per50mean - df$per50se, as.numeric((as.factor(df$trmt))), df$per50mean + df$per50se, angle = 90, code = 3, length = 0.1)
+  arrows(as.numeric((as.factor(df$trmt))), df$per90mean - df$per90se, as.numeric((as.factor(df$trmt))), df$per90mean + df$per90se, angle = 90, code = 3, length = 0.1)
+  dev.off()
+}
