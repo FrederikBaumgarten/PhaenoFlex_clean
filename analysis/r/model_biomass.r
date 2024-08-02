@@ -104,13 +104,27 @@ dat[dat$treatment=="defol3", "timing"] <- 3
 #make timing as a categorical variable
 dat$timing<-as.factor(dat$timing)
 
+#remove control for now
+dat<-dat[dat$treatment %in% c("drought_1", "drought_2", "drought_3", "defol1", "defol2", "defol3"),]
+
 
 #order treatment levels as follows: control, control_heat, GS_extend, GS_extend_heat, drought_2, drought_1, drought_3, defol1, defol2, defol3
-dat$treatment <- factor(dat$treatment, levels = c("control", "GS_extend", "GS_extend_heat", "control_heat", "drought_1", "drought_2", "drought_3", "defol1", "defol2", "defol3"))
+dat$treatment <- factor(dat$treatment, levels = c("GS_extend", "GS_extend_heat", "control_heat", "drought_1", "drought_2", "drought_3", "defol1", "defol2", "defol3"))
+unique(dat$treatment)
+
 
 #fit first model
-stan_glm(biomass_tot ~ treatment, data=dat, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
+fit_1<-stan_glm(biomass_tot ~ treatment, data=dat, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
+print(fit_1)
+#shiny stan
+#plot the posterio
 
+# extract posteriors
+yrep_1<-posterior_predict(fit_1)
+
+
+fit_2<-stan_glm(biomass_tot ~ spec * treatment + spec * timing, data=dat, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
+print(fit_2)
 
 stan_glm(biomass_tot ~ treatment, data=dat, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
 
@@ -118,7 +132,44 @@ stan_glm(biomass_tot ~ treatment, data=dat, prior_intercept=NULL, prior=NULL, pr
 #mod <- stan_lmer(biomass_tot ~ treatment + (1|spec) + (1|block), data = dat, chains = 4, iter = 2000, warmup = 1000, cores = 4, seed = 12345)
 
 
+### Graphics -------------
+## 1. Graph: show total biomass for all treatments
 
+# Define custom labels for the facets
+custom_labels <- c(Acma = "Acer macrophyllum", Bepa = "Betula papyrifera", Pico = "Pinus contorta", Potr = "Populus trichocarpa", Prvi = "Prunus virginiana", Quma = "Quercus garryana", Sese = "Sequoia sempervirens")
+
+#Define order of treatment levels
+dat$treatment <- factor(dat$treatment, levels = c("GS_extend", "GS_extend_heat", "control", "control_heat", "drought_1", "drought_2", "drought_3", "defol1", "defol2", "defol3"))
+
+# Define your custom color palette
+unique_treatments <- unique(dat_summary$treatment)
+treatment_colors <- setNames(c('#241fb4', '#c03004', '#1c6cc8', '#ff460e', '#f0b400', '#af8403', '#634a00', '#b6fd60', '#7cb339', '#417009'), levels(dat$treatment))
+
+# plot
+biomass_tot <- ggplot(dat_summary, aes(x = treatment, y = mean_biomass, fill = treatment)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    geom_errorbar(aes(ymin = mean_biomass - se_biomass, ymax = mean_biomass + se_biomass),
+                                width = 0.2, position = position_dodge(0.9)) +
+    facet_wrap(~ spec, labeller = labeller(spec = custom_labels), scales = "free_y", ncol = 1) +
+    theme_minimal() +
+    theme(panel.background = element_rect(fill = "white"),
+                strip.text = element_text(face = "italic")) +
+    labs(x = "Treatment", y = "Total Biomass (g)", title = "") +
+    scale_fill_manual(values = treatment_colors)
+
+print(biomass_tot)
+
+
+
+
+
+
+
+
+
+
+
+#####################################################################
 
 
 ################################################################################################################################

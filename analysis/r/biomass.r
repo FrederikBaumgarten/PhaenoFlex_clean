@@ -26,7 +26,8 @@ library("ggplot2")
 library("ggpubr")
 library("grid")
 library("tidyr")
-library("dplyr")
+library(ggplot2)
+library(dplyr)
 #library()
 
 #functions
@@ -35,135 +36,196 @@ truelength<-function(x){return(length(which(is.na(x)==FALSE)))}
 ### Daten einlesen ###################################
 ##Monitoring data---------
 dat<-read_xlsx("phaenoflex_data_12_merge_Jan_28_FB.xlsx", sheet = "dat_full", col_names = T, na = "NA")
+dat<-readxl::read_excel("phaenoflex_data_12_merge_Jan_28_FB.xlsx", sheet = "dat_full", na = "NA") # nolint: line_length_linter.
+
 summary(dat)
 str(dat)
 head(dat)
 
 #Variablen bereinigen ---------------
-names(dat)
-dat$tree_ID = as.factor(dat$tree_ID)
+str(dat)
+dat$experiment = as.factor(dat$experiment)
 dat$spec = as.factor(dat$spec)
-dat$BB_order = as.factor(dat$BB_order)
-dat$days_cooling
-dat$doy_transf_forc
-dat$days_forcing
-dat$doy_freezing<-as.factor(dat$doy_freezing)
-  #Leaf-out 2019----------
-  dat$doy_stage_1_2019<-as.numeric(dat$doy_stage_1_2019)
-  dat$doy_stage_2_2019<-as.numeric(dat$doy_stage_2_2019)
-  dat$doy_stage_3_2019<-as.numeric(dat$doy_stage_3_2019)
-  dat$doy_stage_4_2019<-as.numeric(dat$doy_stage_4_2019)
-  dat$frost = as.factor(dat$frost)
-  dat$light = as.factor(dat$light)
-  dat$replicate = as.factor(dat$replicate)
-  #growth----------
-  dat$block = as.factor(dat$block)
-  dat$height_mar_19 = as.numeric(dat$height_mar_19)
-  dat$diameter_mar_19 = as.numeric(dat$diameter_mar_19)
-  dat$height_jan_20 = as.numeric(dat$height_jan_20)
-  dat$diameter_jan_20 = as.numeric(dat$diameter_jan_20)
-  dat$height_oct_20 = as.numeric(dat$height_oct_20)
-  dat$height_inc_tot = dat$height_oct_20 - dat$height_mar_19
-  dat$diameter_oct_20 = as.numeric(dat$diameter_oct_20)
-  dat$dia_inc_1GS = as.numeric(dat$dia_inc_1GS)
-  dat$dia_inc_2GS = as.numeric(dat$dia_inc_2GS)
-  dat$dia_inc_tot <- dat$dia_inc_1GS + dat$dia_inc_2GS
-  dat$biomass_calc_init = as.numeric(dat$biomass_calc_init)
-  dat$biomass_calc_1GS = as.numeric(dat$biomass_calc_1GS)
-  dat$biomass_calc_2GS = as.numeric(dat$biomass_calc_2GS)
-  dat$Inc_bio_1GS = as.numeric(dat$Inc_bio_1GS)
-  dat$Inc_bio_2GS = as.numeric(dat$Inc_bio_2GS)
-  dat$Inc_bio_tot = as.numeric(dat$Inc_bio_tot)
-  dat$Biomass_shoot = as.numeric(dat$Biomass_shoot)
-  dat$Biomass_root = as.numeric(dat$Biomass_root)
-  
-  
-    
-  ####### Recovery -----
-  dat$status  = as.factor(dat$status)
-  dat$sampled_nsc = as.factor(dat$sampled_nsc)
-  
-  dat$freezing_damage_perc = as.numeric(dat$freezing_damage_perc)
-  dat$sec_flush_stage4 = as.numeric(dat$sec_flush_stage4)
-  
-  dat$perc_green_7.June = as.numeric(dat$perc_green_7.June)
-  dat$perc_green_28.June   = as.numeric(dat$perc_green_28.June)
-  dat$perc_green_9.July = as.numeric(dat$perc_green_9.July)
-  dat$perc_green_29.July = as.numeric(dat$perc_green_29.July)
-  dat$perc_green_14.Aug  = as.numeric(dat$perc_green_14.Aug)  
-  dat$perc_green_17.Sep = as.numeric(dat$perc_green_17.Sep)
-  dat$comment_perc_green = as.numeric(dat$comment_perc_green)
-  dat$Anzahl_Blaetter_alt_29.7. = as.numeric(dat$Anzahl_Blaetter_alt_29.7.)
-  dat$Anzahl_Blaetter_neu_29.7. = as.numeric(dat$Anzahl_Blaetter_neu_29.7.)
-  
-  ## Senescence------------
-  dat$perc_leaf_fallen_27.8 = as.numeric(dat$perc_leaf_fallen_27.8)
-  dat$CC_27.8_1 = as.numeric(dat$CC_27.8_1)     
-  dat$CC_27.8_2 = as.numeric(dat$CC_27.8_2)
-  dat$CC_27.8_3 = as.numeric(dat$CC_27.8_3)
-  dat$CC_mean_27.Aug = as.numeric(dat$CC_mean_27.Aug)           
-  dat$CCI_comment
-  dat$perc_leaf_fallen_12.Sep = as.numeric(dat$perc_leaf_fallen_12.Sep)       
-  dat$CC_12.9_1 = as.numeric(dat$CC_12.9_1)                   
-  dat$CC_12.9_2 = as.numeric(dat$CC_12.9_2)       
-  dat$CC_12.9_3 = as.numeric(dat$CC_12.9_3)       
-  dat$CC_mean_12.Sep = as.numeric(dat$CC_mean_12.Sep)                 
-  dat$perc_leaf_fallen_27.Sep = as.numeric(dat$perc_leaf_fallen_27.Sep)       
-  dat$CC_27.9_1 = as.numeric(dat$CC_27.9_1)       
-  dat$CC_27.9_2 = as.numeric(dat$CC_27.9_2)                      
-  dat$CC_27.9_3 = as.numeric(dat$CC_27.9_3)       
-  dat$CC_mean_27.Sep = as.numeric(dat$CC_mean_27.Sep)       
-  dat$perc_leaf_fallen_11.Oct = as.numeric(dat$perc_leaf_fallen_11.Oct)         
-  dat$CC_11.10_1 = as.numeric(dat$CC_11.10_1)       
-  dat$CC_11.10_2 = as.numeric(dat$CC_11.10_2)       
-  dat$CC_11.10_3 = as.numeric(dat$CC_11.10_3)                  
-  dat$CC_mean_11.Oct = as.numeric(dat$CC_mean_11.Oct) 
-  dat$perc_leaf_fallen_18.Oct = as.numeric(dat$perc_leaf_fallen_18.Oct)       
-  dat$CC_18.10_1 = as.numeric(dat$CC_18.10_1)                   
-  dat$CC_18.10_2 = as.numeric(dat$CC_18.10_2)       
-  dat$CC_18.10_3 = as.numeric(dat$CC_18.10_3)       
-  dat$CC_mean_18.Oct = as.numeric(dat$CC_mean_18.Oct)                  
-  dat$perc_leaf_fallen_01.Nov = as.numeric(dat$perc_leaf_fallen_01.Nov)       
-  dat$CC_01.11_1 = as.numeric(dat$CC_01.11_1)       
-  dat$CC_01.11_2 = as.numeric(dat$CC_01.11_2)                   
-  dat$CC_01.11_3 = as.numeric(dat$CC_01.11_3)       
-  dat$CC_mean_01.Nov = as.numeric(dat$CC_mean_01.Nov)       
-  dat$perc_leaf_fallen_15.Nov = as.numeric(dat$perc_leaf_fallen_15.Nov)       
-  dat$CC_15.11_1 = as.numeric(dat$CC_15.11_1)       
-  dat$CC_15.11_2 = as.numeric(dat$CC_15.11_2)       
-  dat$CC_15.11_3 = as.numeric(dat$CC_15.11_3)                 
-  dat$CC_mean_15.Nov = as.numeric(dat$CC_mean_15.Nov)       
-  dat$doy_stage_1_2020 = as.numeric(dat$doy_stage_1_2020)       
-  dat$doy_stage_2_2020 = as.numeric(dat$doy_stage_2_2020)                
-  dat$doy_stage_3_2020 = as.numeric(dat$doy_stage_3_2020)       
-  dat$doy_stage_4_2020 = as.numeric(dat$doy_stage_4_2020)       
-  
-  
-  ##########
+dat$drought_timing = as.factor(dat$drought_timing)
+dat$block<-as.factor(dat$block)
 
-m <- layout(matrix(c(1,2),2,1), widths=c(1,1), heights=c(1,1,1,1,0.3))
-layout.show(m)
+dat[dat$treatment=="drought_4", "treatment"] <- "defol3"
+unique(dat$treatment)
+dat$treatment<-as.factor(dat$treatment)
+dat$rep<-as.factor(dat$rep)
+
+dat$diameter_1_init<-as.numeric(dat$diameter_1_init)
+dat$diameter_2_init<-as.numeric(dat$diameter_2_init)
+dat$diameter_3_init<-as.numeric(dat$diameter_3_init)
+dat$height_1_init<-as.numeric(dat$height_1_init)
+dat$height_2_init<-as.numeric(dat$height_2_init)
+dat$height_3_init<-as.numeric(dat$height_3_init)
+dat$diameter_1GS<-as.numeric(dat$diameter_1GS)
+dat$height_1GS<-as.numeric(dat$height_1GS)
+dat$height1G2<-as.numeric(dat$height1G2)
+dat$biomass_root<-as.numeric(dat$biomass_root)
+dat$biomass_old_shoot<-as.numeric(dat$biomass_old_shoot)
+dat$biomass_new_shoot<-as.numeric(dat$biomass_new_shoot)
+dat$biomass_adventitious_shoots<-as.numeric(dat$biomass_adventitious_shoots)
+dat$number_adventitious_shoots<-as.numeric(dat$number_adventitious_shoots)
+
+##Clean data
+#Remove problematic replicates based on comments, see also shoot_elongation.R
+
+#calculate total biomass
+dat$biomass_tot <- dat$biomass_root + dat$biomass_old_shoot + dat$biomass_new_shoot + dat$biomass_adventitious_shoots
 
 # data overview
-tapply(dat$status, paste(dat$spec, dat$BB_order, dat$frost), function (x) truelength(x))
+tapply(dat$biomass_tot, paste(dat$spec, dat$treatment), function (x) truelength(x))
+
 
 ###Data selection #########
-dat<-subset(dat, status!="other_death") ##remove dead saplings not related to frost
-head(dat)
-length(dat$tree_ID)
-#remove outlayers
-dat<-dat[dat$tree_ID!="Car_2_no_shade_4" & dat$tree_ID!="Car_4_no_shade_3",]
+dat<-dat[dat$spec!="Potr" & dat$spec!="Thpl",] #Remove Potr and Thpl
 
-dat_orig<-dat
 
-dat<-subset(dat, light=="shade") ##select only shade
-length(dat$tree_ID)
+# Calculate mean and standard error for every treatment and species
+dat_summary <- dat %>%
+  group_by(treatment, spec) %>%
+  summarise(mean_biomass = mean(biomass_tot, na.rm = TRUE),
+            se_biomass = sd(biomass_tot, na.rm = TRUE) / sqrt(n()),
+            .groups = 'drop') # Drop the grouping
 
-###total mortality rate after 2nd GS #-----
-dat_growth <- subset(dat, sampled_nsc=="no") ##exclude nsc-samples
-length(dat_growth$tree_ID)
-round(tapply(dat_growth$status!="alive", paste(dat_growth$spec, dat_growth$frost), function (x) sum(x))/
-  tapply(dat_growth$status, paste(dat_growth$spec, dat_growth$frost), function (x) length(x)),2)
+### Graphics -------------
+## 1. Graph: show total biomass for all treatments
+
+# Define custom labels for the facets
+custom_labels <- c(Acma = "Acer macrophyllum", Bepa = "Betula papyrifera", Pico = "Pinus contorta", Potr = "Populus trichocarpa", Prvi = "Prunus virginiana", Quma = "Quercus garryana", Sese = "Sequoia sempervirens")
+
+#Define order of treatment levels
+dat$treatment <- factor(dat$treatment, levels = c("GS_extend", "GS_extend_heat", "control", "control_heat", "drought_1", "drought_2", "drought_3", "defol1", "defol2", "defol3"))
+
+# Define your custom color palette
+unique_treatments <- unique(dat_summary$treatment)
+treatment_colors <- setNames(c('#241fb4', '#c03004', '#1c6cc8', '#ff460e', '#f0b400', '#af8403', '#634a00', '#b6fd60', '#7cb339', '#417009'), levels(dat$treatment))
+
+# plot
+biomass_tot <- ggplot(dat_summary, aes(x = treatment, y = mean_biomass, fill = treatment)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    geom_errorbar(aes(ymin = mean_biomass - se_biomass, ymax = mean_biomass + se_biomass),
+                                width = 0.2, position = position_dodge(0.9)) +
+    facet_wrap(~ spec, labeller = labeller(spec = custom_labels), scales = "free_y", ncol = 1) +
+    theme_minimal() +
+    theme(panel.background = element_rect(fill = "white"),
+                strip.text = element_text(face = "italic")) +
+    labs(x = "Treatment", y = "Total Biomass (g)", title = "") +
+    scale_fill_manual(values = treatment_colors)
+
+print(biomass_tot)
+
+# Export the plot as a PDF
+ggsave(filename = "/Users/frederik/github/PhaenoFlex_clean/analysis/output/biomass_tot.pdf", plot = biomass_tot, device = "pdf", path = NULL, width = 4, height = 18)
+
+######################################
+######## 2. Graph: Same for shoot biomass
+# Calculate mean and standard error for every treatment and species
+str(dat)
+dat_summary <- dat %>%
+  group_by(treatment, spec) %>%
+  summarise(mean_biomass = mean(biomass_new_shoot, na.rm = TRUE),
+            se_biomass = sd(biomass_new_shoot, na.rm = TRUE) / sqrt(n()),
+            .groups = 'drop') # Drop the grouping
+
+
+# plot
+biomass_shoot <- ggplot(dat_summary, aes(x = treatment, y = mean_biomass, fill = treatment)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    geom_errorbar(aes(ymin = mean_biomass - se_biomass, ymax = mean_biomass + se_biomass),
+                                width = 0.2, position = position_dodge(0.9)) +
+    facet_wrap(~ spec, labeller = labeller(spec = custom_labels), scales = "free_y", ncol = 1) +
+    theme_minimal() +
+    theme(panel.background = element_rect(fill = "white"),
+                strip.text = element_text(face = "italic")) +
+    labs(x = "Treatment", y = "New Shoot Biomass (g)", title = "") +
+    scale_fill_manual(values = treatment_colors)
+
+print(biomass_shoot)
+
+# Export the plot as a PDF
+ggsave(filename = "/Users/frederik/github/PhaenoFlex_clean/analysis/output/biomass_new_shoot.pdf", plot = biomass_shoot, device = "pdf", path = NULL, width = 4, height = 18)
+
+
+######################################
+######## 3. Graph: Same for root biomass
+# Calculate mean and standard error for every treatment and species
+str(dat)
+dat_summary <- dat %>%
+  group_by(treatment, spec) %>%
+  summarise(mean_biomass = mean(biomass_root, na.rm = TRUE),
+            se_biomass = sd(biomass_root, na.rm = TRUE) / sqrt(n()),
+            .groups = 'drop') # Drop the grouping
+
+
+# plot
+biomass_root <- ggplot(dat_summary, aes(x = treatment, y = mean_biomass, fill = treatment)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    geom_errorbar(aes(ymin = mean_biomass - se_biomass, ymax = mean_biomass + se_biomass),
+                                width = 0.2, position = position_dodge(0.9)) +
+    facet_wrap(~ spec, labeller = labeller(spec = custom_labels), scales = "free_y", ncol = 1) +
+    theme_minimal() +
+    theme(panel.background = element_rect(fill = "white"),
+                strip.text = element_text(face = "italic")) +
+    labs(x = "Treatment", y = "Root Biomass (g)", title = "") +
+    scale_fill_manual(values = treatment_colors)
+
+print(biomass_root)
+
+# Export the plot as a PDF
+ggsave(filename = "/Users/frederik/github/PhaenoFlex_clean/analysis/output/biomass_root.pdf", plot = biomass_root, device = "pdf", path = NULL, width = 4, height = 18)
+
+
+#-----------------------------------------------------
+# Compare only treatments in June (all species that were exposed to heat as well)
+######################################
+######## 4. Graph: Same for root biomass
+# Calculate mean and standard error for every treatment and species
+str(dat)
+
+# remove treatments levels "drought_1", "drought_3", "defol1", "defol3"
+dat <- dat[!dat$treatment %in% c("drought_1", "drought_3", "defol1", "defol3"),]
+
+
+unique(dat$treatment)
+#Define order of treatment levels
+dat$treatment <- factor(dat$treatment, levels = c("GS_extend", "GS_extend_heat", "control", "control_heat", "drought_1", "drought_2", "drought_3", "defol1", "defol2", "defol3"))
+
+# Define your custom color palette
+unique_treatments <- unique(dat_summary$treatment)
+treatment_colors <- setNames(c('#241fb4', '#c03004', '#1c6cc8', '#ff460e', '#f0b400', '#af8403', '#634a00', '#b6fd60', '#7cb339', '#417009'), levels(dat$treatment))
+
+
+dat_summary <- dat %>%
+  group_by(treatment, spec) %>%
+  summarise(mean_biomass = mean(biomass_tot, na.rm = TRUE),
+            se_biomass = sd(biomass_tot, na.rm = TRUE) / sqrt(n()),
+            .groups = 'drop') # Drop the grouping
+
+
+# plot
+biomass_tot <- ggplot(dat_summary, aes(x = treatment, y = mean_biomass, fill = treatment)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    geom_errorbar(aes(ymin = mean_biomass - se_biomass, ymax = mean_biomass + se_biomass),
+                                width = 0.2, position = position_dodge(0.9)) +
+    facet_wrap(~ spec, labeller = labeller(spec = custom_labels), scales = "free_y", ncol = 1) +
+    theme_minimal() +
+    theme(panel.background = element_rect(fill = "white"),
+                strip.text = element_text(face = "italic")) +
+    labs(x = "Treatment", y = "Total Biomass (g)", title = "") +
+    scale_fill_manual(values = treatment_colors)
+
+print(biomass_tot)
+
+# Export the plot as a PDF
+ggsave(filename = "/Users/frederik/github/PhaenoFlex_clean/analysis/output/June_treats_biomass_total.pdf", plot = biomass_tot, device = "pdf", path = NULL, width = 4, height = 18)
+
+
+
+
+
 
 
 ############## Growth #####
@@ -176,18 +238,18 @@ plot(dat$Biomass_shoot, dat$dia_inc_tot)
 plot(dat$Biomass_shoot, dat$height_inc_tot)
 
 ## Plot to show good correlation between calculated and measured biomass
-corelat<-ggplot(data=dat, aes(x=Biomass_shoot, y=Inc_bio_tot))+
-  facet_wrap(~spec, nrow = 2, ncol=2, scales = "free", labeller = labeller(spec = spec.labs)) +
-  geom_point(data=dat, aes(x=Biomass_shoot, y=Inc_bio_tot, col=frost))+
-  scale_color_manual(name="Frost treatment", labels= c("LT100", "LT50", "control"), values = c("LT100"="lightblue", "LT50"="royalblue1", "no"="green"))+
-  labs(y="Calculated Shoot-Biomass increment [g]", x="Measured Shoot-Biomass [g]") +
-  theme_pubr(base_size = 10, margin = F, legend = "top") +
-  geom_smooth(method="lm", se=FALSE, col="black") 
-# Facet wrap with free scales
-corelat + theme_classic() + theme(plot.title=element_text(face="italic")) +
-  theme(strip.text.x = element_text(face = "italic"))+
-  theme(strip.background = element_rect(color="white", fill="white", size=5, linetype="solid"))+
-  theme(legend.position="bottom")
+    corelat<-ggplot(data=dat, aes(x=Biomass_shoot, y=Inc_bio_tot))+
+    facet_wrap(~spec, nrow = 2, ncol=2, scales = "free", labeller = labeller(spec = spec.labs)) +
+    geom_point(data=dat, aes(x=Biomass_shoot, y=Inc_bio_tot, col=frost))+
+    scale_color_manual(name="Frost treatment", labels= c("LT100", "LT50", "control"), values = c("LT100"="lightblue", "LT50"="royalblue1", "no"="green"))+
+    labs(y="Calculated Shoot-Biomass increment [g]", x="Measured Shoot-Biomass [g]") +
+    theme_pubr(base_size = 10, margin = F, legend = "top") +
+    geom_smooth(method="lm", se=FALSE, col="black") 
+    # Facet wrap with free scales
+    corelat + theme_classic() + theme(plot.title=element_text(face="italic")) +
+    theme(strip.text.x = element_text(face = "italic"))+
+    theme(strip.background = element_rect(color="white", fill="white", size=5, linetype="solid"))+
+    theme(legend.position="bottom")
 
 ########Biomass----------
 ## Plot: calculated TOTAL biomass increment during 2 GS
@@ -231,14 +293,14 @@ b_gs_1<-ggplot(data=dat, aes(fill=frost, x=BB_order, y=Inc_bio_1GS)) +
   theme(strip.text.x = element_text(face = "italic"))+
   theme(strip.background = element_rect(color="white", fill="white", size=5, linetype="solid"))+
   theme(legend.position="bottom")
-
+names(dat)
 
 ### Plot: calculated biomass increment after SECOND GS
 # New facet label names for dose variable
 spec.labs <- c("Carpinus betulus", "Prunus avium", "Fagus sylvatica", "Quercus robur")
 names(spec.labs) <- c("Car", "Pru", "Fag", "Que")
 
-b_gs_2<-ggplot(data=dat, aes(fill=frost, x=BB_order, y=Inc_bio_2GS)) +
+plot<-ggplot(data=dat, aes(fill=frost, x=treatment, y=biomass_tot)) +
   facet_wrap(~spec, nrow = 4, ncol=1, scales = "free", labeller = labeller(spec = spec.labs)) +
   geom_boxplot(aes(fill=factor(frost))) +
   scale_fill_manual(name="Frost treatment", labels= c("LT100", "LT50", "control"),values = c("LT100"="lightblue", "LT50"="royalblue1", "no"="green"))+
@@ -310,8 +372,49 @@ gg + theme_classic() + theme(plot.title=element_text(face="italic")) +
 
 
 
-### Graphics -------------
-## 1. Graph: preseason, BB, mid and endseason for nat. flushing cont and LT100
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #Graph settings ----------
 ymax<-550 #variabeln definieren
 ymin<--50
