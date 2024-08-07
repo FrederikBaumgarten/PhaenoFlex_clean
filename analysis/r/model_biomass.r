@@ -29,7 +29,7 @@ library("tidyr")
 library(ggplot2)
 library(dplyr)
 library(rstanarm)
-
+library(shinystan)
 #library()
 
 #functions
@@ -51,6 +51,11 @@ dat$spec = as.factor(dat$spec)
 dat$drought_timing = as.factor(dat$drought_timing)
 dat$block<-as.factor(dat$block)
 
+##is another control. For now I will exclude this treatment
+dat[dat$treatment=="drought_4" & dat$spec=="Sese", "treatment"] <- NA
+dat<-dat[!is.na(dat$treatment),]
+
+#the other drought_4 treatments were actually used as the third defoliation treatments
 dat[dat$treatment=="drought_4", "treatment"] <- "defol3"
 unique(dat$drought_timing)
 dat$treatment<-as.factor(dat$treatment)
@@ -93,7 +98,7 @@ dat<-dat[dat$treatment %in% c("control", "drought_1", "drought_2", "drought_3", 
 dat$treatment<-as.factor(dat$treatment)
 #make a new variable for timing
 dat$timing<-NA
-dat[dat$treatment=="control", "timing"] <- 0
+dat[dat$treatment=="control", "timing"] <- NA
 dat[dat$treatment=="drought_1", "timing"] <- 1
 dat[dat$treatment=="drought_2", "timing"] <- 2
 dat[dat$treatment=="drought_3", "timing"] <- 3
@@ -104,19 +109,140 @@ dat[dat$treatment=="defol3", "timing"] <- 3
 #make timing as a categorical variable
 dat$timing<-as.factor(dat$timing)
 
-#remove control for now
-dat<-dat[dat$treatment %in% c("drought_1", "drought_2", "drought_3", "defol1", "defol2", "defol3"),]
+#remove other treatments for now
+dat<-dat[dat$treatment %in% c("control", "drought_1", "drought_2", "drought_3", "defol1", "defol2", "defol3"),]
 
 
 #order treatment levels as follows: control, control_heat, GS_extend, GS_extend_heat, drought_2, drought_1, drought_3, defol1, defol2, defol3
-dat$treatment <- factor(dat$treatment, levels = c("GS_extend", "GS_extend_heat", "control_heat", "drought_1", "drought_2", "drought_3", "defol1", "defol2", "defol3"))
-unique(dat$treatment)
+dat$treatment <- factor(dat$treatment, levels = c("control", "GS_extend", "GS_extend_heat", "control_heat", "drought_1", "drought_2", "drought_3", "defol1", "defol2", "defol3"))
+
+#make a new column "treat"
+dat$treat<-NA
+dat[dat$treatment=="control", "treat"] <- "control"
+dat[dat$treatment=="drought_1", "treat"] <- "drought"
+dat[dat$treatment=="drought_2", "treat"] <- "drought"
+dat[dat$treatment=="drought_3", "treat"] <- "drought"
+dat[dat$treatment=="defol1", "treat"] <- "defol"
+dat[dat$treatment=="defol2", "treat"] <- "defol"
+dat[dat$treatment=="defol3", "treat"] <- "defol"
+dat$treat<-as.factor(dat$treat)
+dat$treat <- factor(dat$treat, levels = c("control", "defol", "drought"))
+
+dat$treat
+#make spec as a categorical variable
+dat$spec<-as.factor(dat$spec)
+
+#quick check
+tapply(dat$biomass_tot, paste(dat$spec, dat$treat, dat$timing), function (x) truelength(x))
+tapply(dat$biomass_tot, paste(dat$spec, dat$treat, dat$timing), function (x) mean(x, na.rm=TRUE))
 
 
 #fit first model
-fit_1<-stan_glm(biomass_tot ~ treatment, data=dat, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
+# Define the model formula
+formula <- biomass_tot ~ treat * timing + (1 | spec) #simple model without interactions
+fit_1 <- stan_lmer(
+  formula = formula,
+  data = dat,
+  prior = normal(0, 1),  # Setting priors, modify as needed
+  prior_intercept = normal(0, 1),  # Priors for the intercept
+  prior_covariance = decov(regularization = 1),  # Priors for the covariance of the random effects
+  chains = 4,  # Number of Markov chains
+  iter = 2000,  # Number of iterations per chain
+  seed = 123  # Seed for reproducibility
+)
+
 print(fit_1)
-#shiny stan
+print(summary(fit_1), digits=2)
+
+## shiny stan
+# Convert the fitted model to a shinystan object
+shinystan_obj <- as.shinystan(fit_1)
+launch_shinystan(shinystan_obj)
+
+# Posterior predictive checks
+pp_check(fit_1)
+
+# Generate posterior predictive samples
+posterior_samples <- posterior_predict(fit_1)
+
+# Extract the fixed effects
+fixed_effects <- fixef(fit_1)
+
+# Extract the random effects
+random_effects <- ranef(fit_1)
+
+treatment_levels <- c("control", "drought", "defol")
+timing_levels <- levels(dat$timing)
+species_levels <- levels(dat$spec)
+
+# Create a new data frame to store results
+result_df <- expand.grid(
+  treatment = treatment_levels,
+  timing = timing_levels,
+  species = species_levels
+)
+
+result_df$mean_response <- NA
+result_df$lower_credible_interval <- NA
+result_df$upper_credible_interval <- NA
+
+# Compute expected values and credible intervals
+compute_expected_response <- function(treatment, timing, species, fixed_effects, random_effects) {
+  intercept <- fixed_effects["(Intercept)"] + random_effects[species, "(Intercept)"]
+  treatment_effect <- ifelse(treatment == "control", 0, fixed_effects[paste0("treatment", treatment)])
+  timing_effect <- ifelse(!is.na(timing), fixed_effects[paste0("timing", timing)], 0)
+  interaction_effect <- ifelse(!is.na(timing) & treatment != "control", 
+                fixed_effects[paste0("treatment", treatment, ":timing", timing)], 0)
+  
+  intercept + treatment_effect + timing_effect + interaction_effect
+}
+# Initialize lists to store credible intervals
+lower_credible_intervals <- list()
+upper_credible_intervals <- list()
+
+# Compute the expected values and credible intervals for each combination
+for (i in 1:nrow(result_df)) {
+  treatment <- result_df$treatment[i]
+  timing <- result_df$timing[i]
+  species <- result_df$species[i]
+
+# Compute mean response
+  mean_response <- compute_expected_response(treatment, timing, species, fixed_effects, random_effects)
+  result_df$mean_response[i] <- mean_response
+  
+  # Generate posterior predictive samples for the specific combination if applicable
+  if (treatment != "control" && !is.na(timing)) {
+    newdata <- data.frame(treatment = treatment, timing = timing, species = species)
+    posterior_samples_subset <- posterior_predict(fit, newdata = newdata)
+    
+    # Compute credible intervals
+    lower_credible_intervals[[i]] <- quantile(posterior_samples_subset, 0.025)
+    upper_credible_intervals[[i]] <- quantile(posterior_samples_subset, 0.975)
+  } else {
+    # For control group or missing timing, use NA for credible intervals
+    lower_credible_intervals[[i]] <- NA
+    upper_credible_intervals[[i]] <- NA
+  }
+}
+# Add credible intervals to the data frame
+result_df$lower_credible_interval <- unlist(lower_credible_intervals)
+result_df$upper_credible_interval <- unlist(upper_credible_intervals)
+
+
+
+
+
+
+
+
+
+
+
+
+
+fit_1<-stan_glm(biomass_tot ~ treatment, data=dat, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
+
+
 #plot the posterio
 
 # extract posteriors
