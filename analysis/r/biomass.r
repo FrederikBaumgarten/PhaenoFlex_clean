@@ -49,8 +49,13 @@ dat$spec = as.factor(dat$spec)
 dat$drought_timing = as.factor(dat$drought_timing)
 dat$block<-as.factor(dat$block)
 
+##is another control. For now I will exclude this treatment
+dat[dat$treatment=="drought_4" & dat$spec=="Sese", "treatment"] <- NA
+dat<-dat[!is.na(dat$treatment),]
+
+#the other drought_4 treatments were actually used as the third defoliation treatments
 dat[dat$treatment=="drought_4", "treatment"] <- "defol3"
-unique(dat$treatment)
+unique(dat$drought_timing)
 dat$treatment<-as.factor(dat$treatment)
 dat$rep<-as.factor(dat$rep)
 
@@ -75,13 +80,14 @@ dat$number_adventitious_shoots<-as.numeric(dat$number_adventitious_shoots)
 #calculate total biomass
 dat$biomass_tot <- dat$biomass_root + dat$biomass_old_shoot + dat$biomass_new_shoot + dat$biomass_adventitious_shoots
 
-# data overview
-tapply(dat$biomass_tot, paste(dat$spec, dat$treatment), function (x) truelength(x))
-
-
 ###Data selection #########
 dat<-dat[dat$spec!="Potr" & dat$spec!="Thpl",] #Remove Potr and Thpl
 
+#keep only control, drought and defoliation treatments
+dat<-dat[dat$treatment %in% c("control", "drought_1", "drought_2", "drought_3", "defol1", "defol2", "defol3"),]
+
+# data overview
+tapply(dat$biomass_tot, paste(dat$spec, dat$treatment), function (x) truelength(x))
 
 # Calculate mean and standard error for every treatment and species
 dat_summary <- dat %>%
@@ -90,7 +96,128 @@ dat_summary <- dat %>%
             se_biomass = sd(biomass_tot, na.rm = TRUE) / sqrt(n()),
             .groups = 'drop') # Drop the grouping
 
+
+
+
 ### Graphics -------------
+## For species separately and only control and drought treatments
+
+# Define custom labels for the facets
+custom_labels <- c(Acma = "Acer macrophyllum", Bepa = "Betula papyrifera", Pico = "Pinus contorta", Potr = "Populus trichocarpa", Prvi = "Prunus virginiana", Quma = "Quercus garryana", Sese = "Sequoia sempervirens")
+
+# Define order of treatment levels
+dat$treatment <- factor(dat$treatment, levels = c("GS_extend", "GS_extend_heat", "control", "control_heat", "drought_1", "drought_2", "drought_3", "defol1", "defol2", "defol3"))
+
+# Define your custom color palette
+unique_treatments <- unique(dat_summary$treatment)
+treatment_colors <- setNames(c('#241fb4', '#c03004', '#d1cfcf', '#ff460e', '#f0b400', '#af8403', '#634a00', '#b6fd60', '#7cb339', '#417009'), levels(dat$treatment))
+
+# Filter data for only control and drought treatments
+dat_summary_filtered <- dat_summary[dat_summary$treatment %in% c("control", "drought_1", "drought_2", "drought_3"), ]
+
+# Loop through each species
+for (species in unique(dat_summary_filtered$spec)) {
+  # Filter data for current species
+  dat_summary_species <- dat_summary_filtered[dat_summary_filtered$spec == species, ]
+  
+  # Plot
+  biomass_tot_species <- ggplot(dat_summary_species, aes(x = treatment, y = mean_biomass, fill = treatment)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    geom_errorbar(aes(ymin = mean_biomass - se_biomass, ymax = mean_biomass + se_biomass),
+            width = 0.2, position = position_dodge(0.9)) +
+    facet_wrap(~ spec, labeller = labeller(spec = custom_labels), scales = "free_y", ncol = 1) +
+    theme_minimal() +
+    theme(panel.background = element_rect(fill = "white"),
+        strip.text = element_text(face = "italic")) +
+    labs(x = "Drought timing", y = "Total Biomass (g)", title = "") +
+    scale_fill_manual(values = treatment_colors) +
+    theme(axis.ticks.y = element_line())  # Add tick marks for y-axis
+    
+  biomass_tot_species <- biomass_tot_species +
+    theme(strip.text.x = element_text(face = "italic", hjust = 0, size = 10)) +
+    theme(axis.text.y = element_text(size = 8)) +
+    theme(axis.title = element_text(size = 12, hjust = 0.5)) +
+    theme(plot.title = element_text(size = 12, hjust = 0)) +
+    theme(strip.background = element_rect(color = "white", fill = "white", size = 5, linetype = "solid")) +
+    theme(legend.position = "none") +  # Remove legend
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+    # Modify treatment labels on the x-axis
+    biomass_tot_species <- biomass_tot_species +
+      scale_x_discrete(labels = function(x) {
+      ifelse(x == "control", "Control",
+         ifelse(x == "drought_1", "Budburst",
+          ifelse(x == "drought_2", "June",
+             ifelse(x == "drought_3", "August", x))))
+      }) +
+      theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+  print(biomass_tot_species)
+  
+  # Export the plot as a PDF
+  ggsave(filename = paste0("/Users/frederik/github/PhaenoFlex_clean/analysis/output/biomass_tot_", species, ".pdf"), plot = biomass_tot_species, device = "pdf", path = NULL, width = 3, height = 4)
+}
+
+
+
+### make a multiplot with all species
+
+# Define custom labels for the facets
+custom_labels <- c(Acma = "Acer macrophyllum", Bepa = "Betula papyrifera", Pico = "Pinus contorta", Potr = "Populus trichocarpa", Prvi = "Prunus virginiana", Quma = "Quercus garryana", Sese = "Sequoia sempervirens")
+
+# Define order of treatment levels
+dat$treatment <- factor(dat$treatment, levels = c("GS_extend", "GS_extend_heat", "control", "control_heat", "drought_1", "drought_2", "drought_3", "defol1", "defol2", "defol3"))
+
+# Define your custom color palette
+unique_treatments <- unique(dat_summary$treatment)
+treatment_colors <- setNames(c('#241fb4', '#c03004', '#d1cfcf', '#ff460e', '#f0b400', '#af8403', '#634a00', '#b6fd60', '#7cb339', '#417009'), levels(dat$treatment))
+
+# Filter data for only control and drought treatments
+dat_summary_filtered <- dat_summary[dat_summary$treatment %in% c("control", "drought_1", "drought_2", "drought_3"), ]
+
+#order factor levels of species
+dat_summary_filtered$spec <- factor(dat_summary_filtered$spec, levels = c("Prvi", "Sese", "Acma", "Bepa", "Quma", "Pico"))
+
+# Create a multiplot with all species
+biomass_tot_multiplot <- ggplot(dat_summary_filtered, aes(x = treatment, y = mean_biomass, fill = treatment)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(ymin = mean_biomass - se_biomass, ymax = mean_biomass + se_biomass),
+                width = 0.2, position = position_dodge(0.9)) +
+  facet_wrap(~ spec, labeller = labeller(spec = custom_labels), scales = "free_y", ncol = 2) +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "white"),
+        strip.text = element_text(face = "italic")) +
+  labs(x = "Drought timing", y = "Total Biomass (g)", title = "") +
+  scale_fill_manual(values = treatment_colors) +
+  theme(axis.ticks.y = element_line())  # Add tick marks for y-axis
+
+biomass_tot_multiplot <- biomass_tot_multiplot +
+  theme(strip.text.x = element_text(face = "italic", hjust = 0, size = 10)) +
+  theme(axis.text.y = element_text(size = 8)) +
+  theme(axis.title = element_text(size = 12, hjust = 0.5)) +
+  theme(plot.title = element_text(size = 12, hjust = 0)) +
+  theme(strip.background = element_rect(color = "white", fill = "white", size = 5, linetype = "solid")) +
+  theme(legend.position = "none") +  # Remove legend
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))  # Modify treatment labels on the x-axis
+
+#biomass_tot_multiplot <- biomass_tot_multiplot + scale_y_continuous(limits = c(0, NA), expand = c(0, 0))
+
+print(biomass_tot_multiplot)
+
+# Export the plot as a PDF
+ggsave(filename = "/Users/frederik/github/PhaenoFlex_clean/analysis/output/biomass_tot_multiplot.pdf", plot = biomass_tot_multiplot, device = "pdf", path = NULL, width = 5, height = 6)
+
+
+
+
+
+
+
+
+
+
+
+
 ## 1. Graph: show total biomass for all treatments
 
 # Define custom labels for the facets
