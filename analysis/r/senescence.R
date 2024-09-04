@@ -12,6 +12,7 @@ if(length(grep("britanywuuu", getwd()) > 0)) {
   setwd("/Users/frederik/github/PhaenoFlex_clean/analysis")
 }
 library(readxl)
+library(ggplot2)
 
 # Load----------------------------------------------------------------
 d.a <- read_excel("input/senescence/senescence_Amax.xlsx")
@@ -55,19 +56,6 @@ for (i in 1:length(data_list)){ #a loop to extract doy and values for tyep "A"
     d.temp$type <- "A"
     d.cleaned <- rbind(d.cleaned, d.temp) #append temp to d.cleaned dataframe
   }
-  for (n in 1:nrow(list[["CCI"]])){ #a loop to extract doy and values for tyep "CCI" (same structure as above)
-    data <- list[["CCI"]]
-    CCI <- t(data[n, c(5:13)]) #transpose
-    doy <- sub("_CCI", "", colnames(data)[grepl("CCI", colnames(data))])
-    d.temp <- data.frame((matrix(data = NA, ncol = 0, nrow = length(doy))))
-    d.temp$id <- data$ID[n]
-    d.temp$species <- data$spec[n]
-    d.temp$treatment <- data$drought_timing[n]
-    d.temp$doy <- as.numeric(doy)
-    d.temp$value <- CCI[1:9]
-    d.temp$type <- "CCI"
-    d.cleaned <- rbind(d.cleaned, d.temp)
-  }
   for (n in 1:nrow(list[["percen"]])){ #a loop to extract doy and values for tyep "PERC" (same structure as above)
     data <- list[["percen"]]
     P <- t(data[n, c(5:13)]) #transpose
@@ -79,11 +67,48 @@ for (i in 1:length(data_list)){ #a loop to extract doy and values for tyep "A"
     d.temp$doy <- as.numeric(doy)
     d.temp$value <- P[1:9]
     d.temp$type <- "Percentage"
+    for (o in 1:nrow(d.temp)){ # add 100 (before monitoring) or 0 (after senescence) to empty cells 
+      if (o > 1 && !is.na(d.temp$value[o - 1]) && (is.na(d.temp$value[o]))){
+        d.temp$value[o] <- 0
+      } else if (is.na(d.temp$value[o]) && !(is.na(d.temp$value[o + 1]))) {
+        d.temp$value[o] <- 100
+      }
+      }
+    d.cleaned <- rbind(d.cleaned, d.temp)
+  }
+    for (n in 1:nrow(list[["CCI"]])){ #a loop to extract doy and values for tyep "CCI" (same structure as above)
+    data <- list[["CCI"]]
+    CCI <- t(data[n, c(5:13)]) #transpose
+    doy <- sub("_CCI", "", colnames(data)[grepl("CCI", colnames(data))])
+    d.temp <- data.frame((matrix(data = NA, ncol = 0, nrow = length(doy))))
+    d.temp$id <- data$ID[n]
+    d.temp$species <- data$spec[n]
+    d.temp$treatment <- data$drought_timing[n]
+    d.temp$doy <- as.numeric(doy)
+    d.temp$value <- CCI[1:9]
+    d.temp$type <- "CCI"
+    for (o in 1:nrow(d.temp)) {
+      match <- which(d.cleaned$id == d.temp$id[o] & d.cleaned$doy == d.temp$doy[o] & d.cleaned$type == "Percentage")
+      if (o > 1 && length(match) > 0 && !is.na(d.cleaned$value[match]) && is.na(d.temp$value[o])) {
+        d.temp$value[o] <- d.temp$value[o - 1]
+      }
+      else if (o == nrow(d.temp) && is.na(d.temp$value[o])){
+        d.temp$value[o]<- 0
+      }
+    }
     d.cleaned <- rbind(d.cleaned, d.temp)
   }
 }
 d.cleaned$value <- as.numeric(d.cleaned$value)
 head(d.cleaned)
+tail(d.cleaned)
+print(d.cleaned$id[which(d.cleaned$type == "Percentage" & is.na(d.cleaned$value))])
+print(d.cleaned$id[which(d.cleaned$type == "Percentage" & is.na(d.cleaned$value))])
+cci <- subset(d.cleaned, d.cleaned$type == "CCI")
+percent <- subset(d.cleaned, d.cleaned$type == "Percentage")
+print(percent)
+unique(percent$value)
+print(cci)
 #preliminary plots--------------------------------------------------
 #plotting to see the original data
 colors <- rainbow(length(unique(d.cleaned$type))) 
