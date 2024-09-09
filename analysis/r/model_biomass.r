@@ -30,6 +30,7 @@ library(ggplot2)
 library(dplyr)
 library(rstanarm)
 library(shinystan)
+library(tidybayes)
 #library()
 
 #functions
@@ -137,7 +138,86 @@ tapply(dat$biomass_tot, paste(dat$spec, dat$treat, dat$timing), function (x) tru
 tapply(dat$biomass_tot, paste(dat$spec, dat$treat, dat$timing), function (x) mean(x, na.rm=TRUE))
 
 
-#fit first model
+#################################-----------
+#fit first model: only treatment (combined with timing)
+# Define the model formula
+formula <- biomass_tot ~ treatment + (1 | spec) #simple model without interactions
+fit_1 <- stan_lmer(
+  formula = formula,
+  data = dat,
+  prior = normal(0, 1),  # Setting priors, modify as needed
+  prior_intercept = normal(0, 1),  # Priors for the intercept
+  prior_covariance = decov(regularization = 1),  # Priors for the covariance of the random effects
+  chains = 4,  # Number of Markov chains
+  iter = 2000,  # Number of iterations per chain
+  seed = 123  # Seed for reproducibility
+)
+
+print(fit_1)
+print(summary(fit_1), digits=2)
+
+## shiny stan
+# Convert the fitted model to a shinystan object
+shinystan_obj <- as.shinystan(fit_1)
+launch_shinystan(shinystan_obj)
+
+# Posterior predictive checks
+pp_check(fit_1)
+
+# Extract the fixed effects
+fixed_effects <- fixef(fit_1)
+
+# Extract the random effects
+random_effects <- ranef(fit_1)
+
+treatment_levels <- c("control", "drought_1", "drought_2", "drought_3", "defol1", "defol2", "defol3")
+species_levels <- c("Acma", "Bepa", "Pico", "Prvi", "Quma", "Sese")
+
+# Create a new data frame to store results
+result_df <- expand.grid(
+  treatment = treatment_levels,
+  spec = species_levels
+)
+result_df$mean_response <- NA
+result_df$lower_credible_interval <- NA
+result_df$upper_credible_interval <- NA
+
+
+# Step 1: Generate new data for predictions
+new_data <- expand.grid(
+  treatment = treatment_levels,
+  spec = species_levels
+)
+
+# Use add_predicted_draws to get posterior predicted samples
+predicted_draws <- add_predicted_draws(fit_1, newdata = new_data)
+
+# Summarize the predictions
+summarized_predictions <- predicted_draws %>%
+  group_by(treatment, spec) %>%
+  summarise(
+    mean_response = mean(.prediction),
+    lower_credible_interval = quantile(.prediction, 0.025),
+    upper_credible_interval = quantile(.prediction, 0.975)
+  ) %>%
+  ungroup()
+
+# Print the summarized predictions
+print(summarized_predictions)
+tapply(dat$biomass_tot, paste(dat$spec, dat$treat, dat$timing), function (x) mean(x, na.rm=TRUE))
+tapply(dat$biomass_tot, paste(dat$spec, dat$treat, dat$timing), function (x) median(x, na.rm=TRUE))
+
+
+
+
+
+
+
+
+
+############################################################
+
+#fit second model
 # Define the model formula
 formula <- biomass_tot ~ treat * timing + (1 | spec) #simple model without interactions
 fit_1 <- stan_lmer(
