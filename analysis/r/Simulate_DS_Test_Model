@@ -1,0 +1,304 @@
+##======================================================================================================
+##  PhaenoFlex
+##  Test DS
+# Idea: Simulate data with a distinct pattern so that I can easy check a model output with posteriors
+##
+## Date:             Sept 17 2024
+## Author:           Frederik Baumgarten
+#======================================================================================================
+
+rm(list=ls(all=TRUE))
+
+#------------------------------------------------------------------------------------------------------
+# Einstellungen
+#------------------------------------------------------------------------------------------------------
+# Set Working Directory
+setwd("/Users/frederik/github/PhaenoFlex_clean/analysis/input/biomass")
+# Libraries ------------
+library(raster)
+library(readxl)
+library(xlsx)
+library(arm)
+library(stats)
+library(data.table)
+library(geosphere)
+library("ggplot2")
+library("ggpubr")
+library("grid")
+library("tidyr")
+library(ggplot2)
+library(dplyr)
+library(rstanarm)
+library(posterior)
+library(shinystan)
+library(tidybayes)
+#library()
+
+
+# Create a dataset with 7 treatments. To make it easy: 
+# y=biomass
+#
+#
+#
+#
+#
+#
+#
+#
+#
+set.seed(123) # For reproducibility
+
+# Define the treatments
+treatments <- c('control', 'dro1', 'dro2', 'dro3', 'def1', 'def2', 'def3')
+
+# Define the mean values for each treatment
+means <- c(100, 90, 80, 70, 60, 50, 40)
+
+# Define the standard deviation
+sd_value <- 1
+
+# Number of samples per treatment
+n <- 15
+
+# Generate the dataset
+dataset <- data.frame(
+  treatment = rep(treatments, each = n),
+  y = unlist(lapply(means, function(mean) rnorm(n, mean, sd_value)))
+)
+
+# Print the first few rows of the dataset
+head(dataset)
+
+
+fit_1<-stan_glm(y ~ treatment, data=dataset, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
+fit_1<-stan_glm(y ~ treatment + species, data=dataset, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
+
+
+
+########################
+set.seed(123) # For reproducibility
+
+# Define treatments
+treatments <- c('control', 'dro1', 'dro2', 'dro3', 'def1', 'def2', 'def3')
+treatments <- factor(treatments, levels = c('control', 'dro1', 'dro2', 'dro3', 'def1', 'def2', 'def3'))
+
+
+# Define species and their corresponding mean adjustments
+species <- c('species1', 'species2', 'species3', 'species4', 'species5', 'species6')
+species_additions <- seq(0, 500, by=100)
+
+# Define the base mean values for treatments
+base_means <- c(100, 90, 80, 70, 60, 50, 40)
+
+# Define the standard deviation
+sd_value <- 10
+
+# Number of samples per treatment-species combination
+n <- 15
+
+# Initialize an empty data frame to store the results
+dataset <- data.frame(treatment=character(), species=character(), y=numeric())
+
+for (i in seq_along(species)) {
+  for (j in seq_along(treatments)) {
+    treatment <- treatments[j]
+    species_name <- species[i]
+    mean_value <- base_means[j] + species_additions[i]
+    y_values <- rnorm(n, mean = mean_value, sd = sd_value)
+    
+    temp_df <- data.frame(treatment = rep(treatment, n), species = rep(species_name, n), y = y_values)
+    dataset <- rbind(dataset, temp_df)
+  }
+}
+
+# Viewing the first few rows of the dataset
+head(dataset)
+
+# Summarize the dataset
+summary_data <- dataset %>%
+  group_by(treatment, species) %>%
+  summarize(
+    mean_y = mean(y),
+    sd_y = sd(y),
+    n = n()
+  ) %>%
+  ungroup()
+print(summary_data, n = 42)
+
+
+
+fit_1<-stan_glm(y ~ treatment, data=dataset, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
+
+
+
+
+fit_1<-stan_glm(y ~ treatment + species, data=dataset, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
+
+fit_1<-stan_glm(y ~ treatment + species + treatment*species, data=dataset, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
+
+fit_1<-stan_glm(y ~ treatment*species, data=dataset, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
+
+# Extract the posterior draws
+posterior_draws <- as_draws_df(fit_1)
+str(posterior_draws)
+
+# Define a function to calculate the effect for a particular treatment and species combination
+calculate_effect <- function(intercept, treatment, species, interaction) {
+  intercept + treatment + species + interaction
+}
+
+# Initialize a list to store results
+posterior_effects <- list()
+
+# Calculate the effect for each treatment and species combination
+for (i in seq_along(species)) {
+  species_name <- species[i]
+  species_col <- ifelse(species_name == "species1", 0, posterior_draws[[paste0("species", species_name)]])
+  
+  for (j in seq_along(treatments)) {
+    treatment_name <- treatments[j]
+    treatment_col <- ifelse(treatment_name == "control", 0, posterior_draws[[paste0("treatment", treatment_name)]])
+    
+    interaction_col <- if (species_name != "species1" & treatment_name != "control") {
+      posterior_draws[[paste0("treatment", treatment_name, ":species", species_name)]]
+    } else {
+      0
+    }
+    
+    effect_name <- paste(treatment_name, species_name, sep = "_")
+    posterior_effects[[effect_name]] <- calculate_effect(
+      posterior_draws$`(Intercept)`,
+      treatment_col,
+      species_col,
+      interaction_col
+    )
+  }
+}
+
+# Summarize the posterior distributions for each combination
+summary_effects <- lapply(posterior_effects, function(x) {
+  data.frame(
+    mean = mean(x),
+    sd = sd(x),
+    q2.5 = quantile(x, 0.025),
+    q97.5 = quantile(x, 0.975)
+  )
+})
+
+# Convert the summary to a data frame
+summary_effects_df <- do.call(rbind, summary_effects)
+summary_effects_df <- cbind(Combination = rownames(summary_effects_df), summary_effects_df)
+rownames(summary_effects_df) <- NULL
+
+# Print the summarized effects
+print(summary_effects_df)
+
+#####################################
+### Plotting
+
+### 1. graph: plot the means±SD for each treatment level
+# Create a summarized data frame for each treatment level and species
+summary_effects_df <- summary_effects_df %>%
+  mutate(
+    species = sub(".*_", "", Combination),
+    treatment = sub("_.*", "", Combination)
+  )
+
+# Summarize the data to get means and SDs for each treatment and species
+treatment_means <- summary_effects_df %>%
+  group_by(treatment, species) %>%
+  summarize(
+    mean = mean(mean),
+    sd = mean(sd)
+  )
+
+# Convert `treatment` and `species` to factors to maintain ordering in the plot
+treatment_means$treatment <- factor(treatment_means$treatment, levels = c('control', 'dro1', 'dro2', 'dro3', 'def1', 'def2', 'def3'))
+treatment_means$species <- factor(treatment_means$species, levels = c('species1', 'species2', 'species3', 'species4', 'species5', 'species6'))
+
+
+# Custom colors for treatments
+treatment_colors <- c("control" = "#b7c5cf", "dro1" = "#f69f2e", "dro2" = "#ac7021", "dro3" = "#6b4614", "def1" = "#7bff1d", "def2" = "#5fc516", "def3" = "#408410")
+
+# Create a ggplot of means ± SDs for each treatment level, faceted by species in a single column
+testplot<-ggplot(treatment_means, aes(x = treatment, y = mean, fill = treatment)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2, position = position_dodge(0.9)) +
+  facet_wrap(~ species, scales = "free_y", ncol = 1) +
+  theme_minimal() +
+  theme(panel.background = element_rect(fill = "white"),
+        strip.text = element_text(face = "italic")) +
+  labs(x = "Treatment", y = "Mean ± SD") +
+  scale_fill_manual(values = treatment_colors) +
+  theme(axis.ticks.y = element_line(),  # Add tick marks for y-axis
+        strip.text.x = element_text(face = "italic", hjust = 0, size = 10),
+        axis.text.y = element_text(size = 8),
+        axis.title = element_text(size = 12, hjust = 0.5),
+        plot.title = element_text(size = 12, hjust = 0),
+        strip.background = element_rect(color = "white", fill = "white"),
+        legend.position = "none",  # Remove legend
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  scale_x_discrete(labels = function(x) {
+    ifelse(x == "control", "Con",
+           ifelse(x == "dro1", "Dro_1",
+                  ifelse(x == "dro2", "Dro_2",
+                         ifelse(x == "dro3", "Dro_3",
+                                ifelse(x == "def1", "Def_1",
+                                       ifelse(x == "def2", "Def_2",
+                                              ifelse(x == "def3", "Def_3", x)))))))
+  }) +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+  # Export the plot as a PDF
+ggsave(filename = "/Users/frederik/github/PhaenoFlex_clean/analysis/output/testdata/testplot.pdf", plot = testplot, device = "pdf", path = NULL, width = 2, height = 6)
+
+### 2. graph: plot the effect sizes
+# Calculate the overall species means
+overall_mean_effects <- summary_effects_df %>%
+  rowwise() %>%
+  mutate(species = sub(".*_", "", Combination),
+         treatment = sub("_.*", "", Combination)) %>%
+  group_by(treatment, species) %>%
+  summarize(
+    mean = mean(mean),
+    lower = mean(q2.5),
+    upper = mean(q97.5)
+  )
+
+# Remove the overall effect combination
+overall_mean_effects <- overall_mean_effects %>%
+  filter(species != "species1")
+
+# Convert species to a factor for plotting
+overall_mean_effects$species <- factor(overall_mean_effects$species, levels = c('species2', 'species3', 'species4', 'species5', 'species6'))
+
+# Prepare data for overall mean across all species
+overall_species_mean <- overall_mean_effects %>%
+  group_by(treatment) %>%
+  summarize(
+    mean = mean(mean),
+    lower = mean(lower),
+    upper = mean(upper)
+  )
+overall_species_mean$species <- "Overall"
+
+# Combine the overall mean with the other data
+combined_effects <- bind_rows(overall_mean_effects, overall_species_mean)
+
+# Plot
+ggplot(combined_effects, aes(x = mean, y = interaction(treatment, species), color = species)) +
+  geom_point() +
+  geom_errorbarh(aes(xmin = lower, xmax = upper), height = 0.3) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  scale_color_manual(values = c(RColorBrewer::brewer.pal(5, "Set1"), "black")) +
+  theme_minimal() +
+  labs(
+    title = "Effect Sizes with Credible Intervals",
+    x = "Effect Size",
+    y = "Treatment x Species",
+    color = "Species"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.minor = element_blank()
+  )
