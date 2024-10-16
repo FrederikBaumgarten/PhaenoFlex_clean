@@ -249,3 +249,86 @@ ggsave(filename = "/Users/frederik/github/PhaenoFlex_clean/analysis/output/poste
 
 
 
+### 2. graph: plot the means±SD for each treatment level in comparison to control
+
+#extract control
+summary_effects_df[summary_effects_df$Combination == "control_Prvi", "mean"]
+
+#identify all treatments per species and substract the mean control from all other means
+#make new df
+summary_effects_df_sub<-summary_effects_df
+summary_effects_df_sub$mean_sub<-NA
+spec<-c("Prvi", "Acma", "Quma", "Bepa", "Pico", "Sese")
+for(i in 1:length(spec)){
+    tmp<-summary_effects_df[grepl(spec[i], summary_effects_df$Combination), "mean"] - summary_effects_df[summary_effects_df$Combination==paste("control", spec[i], sep = "_"), "mean"]
+                                                                                      
+    summary_effects_df_sub[grepl(spec[i], summary_effects_df$Combination), "mean_sub"]<- tmp
+}
+
+str(summary_effects_df_sub)
+#assign NA to controls
+summary_effects_df_sub[grepl("control_", summary_effects_df$Combination), ]<-NA
+
+#Remove all treatments with NAs
+summary_effects_df_sub<-summary_effects_df_sub[!is.na(summary_effects_df_sub$mean_sub),]
+
+#####################################
+### Plotting
+
+### 2. graph: plot the means±SD for each treatment level
+# Create a summarized data frame for each treatment level and species
+#summary_effects_df_sub <- summary_effects_df_sub %>%
+#  mutate(
+#    species = sub(".*_", "", Combination),
+#    treatment = sub("_.*", "", Combination)
+#  )
+
+#unique(summary_effects_df$treatment)
+# Convert `treatment` and `species` to factors to maintain ordering in the plot
+summary_effects_df_sub$treatment <- factor(summary_effects_df_sub$treatment, levels = c("drought1", "drought2", "drought3", "defol1", "defol2", "defol3"))
+summary_effects_df_sub$species <- factor(summary_effects_df_sub$species, levels = c("Prvi", "Acma", "Quma", "Bepa", "Pico", "Sese"))
+
+
+# Custom colors for treatments
+treatment_colors <- c("drought1" = "#b7c5cf", "drought2" = "#f69f2e", "drought3" = "#7bff1d", "defol1" = "#ea3939", "defol2" = "#91a417", "defol3" =  "#b8c46a")
+species_colors<- c("Prvi" = "#b7c5cf", "Acma" = "#f69f2e", "Quma" = "#7bff1d", "Bepa" = "#ea3939", "Pico" = "#91a417", "Sese" = "#67702b")
+
+# Define custom labels for the facets
+custom_labels <- c(Acma = "Acer macrophyllum", Bepa = "Betula papyrifera", Pico = "Pinus contorta", Potr = "Populus trichocarpa", Prvi = "Prunus virginiana", Quma = "Quercus garryana", Sese = "Sequoia sempervirens")
+position_dodge_width <- 0.6 # Adjust position_dodge to cluster species within a treatment
+
+# Create a ggplot of means ± SDs for each treatment level, faceted by species in a single column
+biomass_post_treat_sub <- ggplot(summary_effects_df_sub, aes(y = treatment, x = mean_sub, color = species)) +
+  geom_point(position = position_dodge(width = position_dodge_width), size = 3) +  # Use points
+  geom_errorbar(aes(xmin = mean_sub - sd, xmax = mean_sub + sd), width = 0, position = position_dodge(width = position_dodge_width)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey") +  # Dashed line at x = 0
+  theme_minimal() +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    strip.text = element_text(face = "italic"),
+    axis.ticks.x = element_line(),  # Add tick marks for x-axis
+    strip.text.x = element_text(face = "italic", hjust = 0, size = 10),
+    axis.text.x = element_text(size = 8),
+    axis.title = element_text(size = 12, hjust = 0.5),
+    plot.title = element_text(size = 12, hjust = 0),
+    strip.background = element_rect(color = "white", fill = "white"),
+    #legend.position = "none",  # Remove legend
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  scale_color_manual(values = species_colors) +  # Use species-specific colors
+  scale_y_discrete(labels = function(y) {
+    ifelse(y == "defol1", "Defoliation Budburst",
+    ifelse(y == "defol2", "Defoliation Solstice",
+    ifelse(y == "defol3", "Defoliation August",
+    ifelse(y == "drought1", "Drought Budburst",
+    ifelse(y == "drought2", "Drought Solstice",
+    ifelse(y == "drought3", "Drought August",
+    ifelse(y == "def3", "Def_3", y)))))))
+  }) +
+  labs(y = "Treatment", x = "Change to control (Mean ± SD g of total Biomass)") +
+  theme(axis.text.y = element_text(size = 8))
+
+# Export the plot as a PDF
+ggsave(filename = "/Users/frederik/github/PhaenoFlex_clean/analysis/output/posteriors/biomass_post_treat_sub.pdf", plot = biomass_post_treat_sub, width = 4, height = 5)
+

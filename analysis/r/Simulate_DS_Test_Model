@@ -39,41 +39,6 @@ library(tidybayes)
 # y=biomass
 #
 #
-#
-#
-#
-#
-#
-#
-#
-set.seed(123) # For reproducibility
-
-# Define the treatments
-treatments <- c('control', 'dro1', 'dro2', 'dro3', 'def1', 'def2', 'def3')
-
-# Define the mean values for each treatment
-means <- c(100, 90, 80, 70, 60, 50, 40)
-
-# Define the standard deviation
-sd_value <- 1
-
-# Number of samples per treatment
-n <- 15
-
-# Generate the dataset
-dataset <- data.frame(
-  treatment = rep(treatments, each = n),
-  y = unlist(lapply(means, function(mean) rnorm(n, mean, sd_value)))
-)
-
-# Print the first few rows of the dataset
-head(dataset)
-
-
-fit_1<-stan_glm(y ~ treatment, data=dataset, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
-fit_1<-stan_glm(y ~ treatment + species, data=dataset, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
-
-
 
 ########################
 set.seed(123) # For reproducibility
@@ -137,6 +102,8 @@ fit_1<-stan_glm(y ~ treatment + species, data=dataset, prior_intercept=NULL, pri
 fit_1<-stan_glm(y ~ treatment + species + treatment*species, data=dataset, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
 
 fit_1<-stan_glm(y ~ treatment*species, data=dataset, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
+
+fit_1<-stan_lmer(y ~ treatment*species, data=dataset, prior_intercept=NULL, prior=NULL, prior_aux=NULL)
 
 # Extract the posterior draws
 posterior_draws <- as_draws_df(fit_1)
