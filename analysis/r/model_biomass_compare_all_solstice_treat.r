@@ -14,6 +14,7 @@ rm(list=ls(all=TRUE))
 #------------------------------------------------------------------------------------------------------
 # Set Working Directory
 setwd("/Users/frederik/github/PhaenoFlex_clean/analysis/input/biomass")
+# setwd("/Users/lizzie/Documents/git/projects/others/fredi/PhaenoFlex_clean/analysis/input/biomass/")
 # Libraries ------------
 library(raster)
 library(readxl)
@@ -39,6 +40,7 @@ truelength<-function(x){return(length(which(is.na(x)==FALSE)))}
 ### Daten einlesen ###################################
 ##Monitoring data---------
 dat<-read_xlsx("phaenoflex_data_12_merge_Jan_28_FB.xlsx", sheet = "dat_full", col_names = T, na = "NA")
+dat <- read.csv("phaenoflex_data_12_merge_Jan_28_FB_datfull.csv")
 #dat<-readxl::read_excel("phaenoflex_data_12_merge_Jan_28_FB.xlsx", sheet = "dat_full", na = "NA") # nolint: line_length_linter.
 
 summary(dat)
