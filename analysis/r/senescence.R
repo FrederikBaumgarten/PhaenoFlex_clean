@@ -17,12 +17,12 @@ library(ggplot2)
 # Load----------------------------------------------------------------
 d.a <- read_excel("input/senescence/senescence_Amax.xlsx")
 d.other <- read_excel("input/senescence/senescence_5_Sept_FB.xlsx", sheet = "percentage")
-
+str(d.other)
 # Format data 
-rep.info <- d.other[, 1:4]
-d.index <- cbind(rep.info, d.other[, grep("INDEX", colnames(d.other))])
-d.percent <- cbind(rep.info, d.other[, grep("PERC", colnames(d.other))])
-d.cci <- cbind(rep.info, d.other[, grep("CCI", colnames(d.other))])
+rep.info <- d.other[, 1:4] # separates the columns specifying replicates, treatments etc.
+d.index <- cbind(rep.info, d.other[, grep("INDEX", colnames(d.other))]) # selecting all columns containing "INDEX" and attaches them to the rep.info
+d.percent <- cbind(rep.info, d.other[, grep("PERC", colnames(d.other))]) # selecting all columns containing "PERC" and attaches them to the rep.info
+d.cci <- cbind(rep.info, d.other[, grep("CCI", colnames(d.other))]) # selecting all columns containing "CCI" and attaches them to the rep.info
 
 # Function to subset data based on species
 subset_data <- function(species, a, index, percen, CCI) {
