@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------
 # Senescence data 
-# Author: Britany Wu
+# Author: Britany Wu, Frederik Baumgarten
 # Date: July 8th
 #--------------------------------------------------------------------
 # Housekeeping
@@ -18,6 +18,27 @@ library(ggplot2)
 d.a <- read_excel("input/senescence/senescence_Amax.xlsx")
 d.other <- read_excel("input/senescence/senescence_5_Sept_FB.xlsx", sheet = "percentage")
 str(d.other)
+
+for (col in names(d.other)) {
+  if (grepl("PERC|INDEX|CCI", col)) {
+    d.other[[col]] <- as.numeric(d.other[[col]])
+  }
+}
+
+### dealing with missing data/NAs
+# 1. case: first monitoring dates have a percentage value but no CCI
+
+# 2. case: index shows error because CCI is NA. Because the percentage is at zero also the index should be set to zero
+# -> solution: if PERC == 0 then set the INDEX for the same date also to 0
+monit_day<-as.character(gsub("_INDEX", "", colnames(d.other)[grepl("INDEX", colnames(d.other))]))
+for (i in seq_along(monit_day)) {
+  if percentage of date i == 0 then also make the index of the same date 0
+  d.other[, grep(monit_day[i], colnames(d.other))]
+  tmp[colnames(tmp)[2]==100,]
+}
+# 3. case: 
+
+
 # Format data 
 rep.info <- d.other[, 1:4] # separates the columns specifying replicates, treatments etc.
 d.index <- cbind(rep.info, d.other[, grep("INDEX", colnames(d.other))]) # selecting all columns containing "INDEX" and attaches them to the rep.info
@@ -109,6 +130,10 @@ percent <- subset(d.cleaned, d.cleaned$type == "Percentage")
 print(percent)
 unique(percent$value)
 print(cci)
+unique(cci$value)
+
+
+
 #preliminary plots--------------------------------------------------
 #plotting to see the original data
 colors <- rainbow(length(unique(d.cleaned$type))) 

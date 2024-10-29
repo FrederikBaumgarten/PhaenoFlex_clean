@@ -32,6 +32,7 @@ library(dplyr)
 library(rstanarm)
 library(shinystan)
 library(tidybayes)
+library(posterior)
 #library()
 
 #functions
@@ -180,6 +181,9 @@ summary_effects <- lapply(posterior_effects, function(x) {
     mean = mean(x),
     sd = sd(x),
     q2.5 = quantile(x, 0.025),
+    q25 = quantile(x, 0.25),
+    q50 = quantile(x, 0.5),
+    q75 = quantile(x, 0.75)
     q97.5 = quantile(x, 0.975)
   )
 })
