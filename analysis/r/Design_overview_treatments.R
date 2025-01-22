@@ -13,7 +13,7 @@ options(stringsAsFactors=FALSE)
 
 #*------------------------------------------------------------------------------------------------------
 # Set the path to your directory folder called PhotoChain
-directory_path <- "/Users/christophe_rouleau-desrochers/Documents/github/PhaenoFlex/treatment_overview/R"
+directory_path <- "/Users/frederik/github/PhaenoFlex_clean/analysis/input/"
 
 # Set Working Directory
 setwd(directory_path)
@@ -27,8 +27,7 @@ library(stringr)
 library(readxl)
 
 # TREATMENTS SCHEDULE===========================================
-schedule <- read_xlsx("raw_data/treatments_schedule.xlsx")
-
+schedule <- read_xlsx("treatments_schedule.xlsx")
 # convert to numeric
 # Convert selected columns to numeric
 cols_to_convert <- c("dro_1_start", "dro_1_end", "dro_1_length", "dro_2_start", "dro_2_length", "heatwave_start", "defol_1_start", "defol_2_start")
@@ -47,8 +46,8 @@ schedule_sese <- subset(schedule, id =="Sese")
 
 
 #read excel file
-cchamber1<-read.csv("raw_data/CC 1 2023-06-21 16_57_52 PDT (Data PDT).csv")
-photoperiods<-read.csv("raw_data/dro_1_photoperiod.csv")
+cchamber1<-read.csv("meteo/climate_chamber/CC 1 2023-06-21 16_57_52 PDT (Data PDT).csv")
+photoperiods<-read.csv("/Users/frederik/github/PhaenoFlex_clean/notes/dro_1_photoperiod.csv")
 
 # Change format of time columns
 photoperiods$light_on <- str_pad(photoperiods$light_on, width = 8, pad = "0")
