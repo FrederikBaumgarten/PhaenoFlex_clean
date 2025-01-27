@@ -5,7 +5,6 @@
 \usepackage{Sweave}
 \usepackage{graphicx}
 \usepackage{natbib}
-%\usepackage{biblatex}
 \usepackage{amsmath}
 \usepackage{textcomp}%among other things, it allows degrees C to be added
 \usepackage{float}
@@ -48,7 +47,7 @@
 % more optionals! %
 \usepackage{booktabs} %clean and professional look for tables
 
-\graphicspath{ {/Users/frederik/github/PhaenoFlex_clean/analysis/output/} }% tell latex where to find figures 
+\graphicspath{ {/Users/frederik/github/PhaenoFlex_clean/docs/figs/} }% tell latex where to find figures 
 
 \begin{document}
 %	\renewcommand{\bibname}{References}%names reference list 
@@ -107,7 +106,7 @@
 	%\end{table}
 	
 	
-	The study was conducted on the campus of the University of British Columbia (Totem Field; 49.2572 N, -123.2503 E) located in Vancouver, Canada. The climate is oceanic characterized by the proximity of the Pacific with a mean annual temperature around 10°C (18°C in July and 4°C in January). Together with an annual precipitation of c. 1500mm this climate supports a typical temperate rain forest along the west coast.
+	The study was conducted on the campus of the University of British Columbia (Totem Field; 49.2572 N, -123.2503 E) located in Vancouver, Canada. The climate is oceanic characterized by the proximity of the Pacific with a mean annual temperature around 10°C (18°C in July and 4°C in January). Together with an annual precipitation of c. 1500mm this climate supports a typical temperate rain forest along the west coast. %Vancouver has been subjected to heat waves in the past years. For instance, the greater Vancouver area has been strucked with severe heat waves in 2009 and 2021 that lasted extended periods (Henderson et al., 2016; Henderson, McLean, Lee, Kosatsky, 2022). In addition of those very rare temperature, 2021 heat dome was characterised by near peak daylight hours and high night temperature (Henderson et al., 2022). 
 	
 	\subsection*{Experimental setup}
 		
@@ -118,6 +117,13 @@
 	
 		\subsection*{Study design and treatments}
 	The whole study design is depicted in Fig. \ref{fig:fig_1xxx} for an overview. Saplings were subjected to a) a growing season extension, b) one out of 3 drought timings, c) one out of 3 defoliation events and d) a heat event, resulting in eight treatments plus control. 15 replicates were randomly assigned to each treatment (8 treatments plus control à 15 replicates = 135 saplings/species). \\  
+	
+			\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.9\textwidth]{design_schematic.pdf} 
+		\caption{Schematic overview of the average temperature curve at the field site with the vegetation season in green. Depicted are all types and timings of treatments during the year 2023 }
+		\label{fig:fig_1xx}
+	\end{figure}
 	
 	\textit{Growing season extension} \\
 	Growing season extensions were achieved by prolonging dormancy of all other treatments for a month (see above). Hence sampling of this treatment accumulated xxx more growing degree days (GDD) by being exposed to ambient conditions. Depending on species this `warming' advanced budburst by X to Y days (see XX).\\
@@ -136,12 +142,7 @@
 	\textit{Heat treatment} \\
 	The simulated heat wave (walk in climate chamber, LTRB, BioChambers) aimed to bring saplings to their upper temperature threshold where growth and photosynthesis ceases. The treatment started together with the second drought timing (23 June) and lasted the same species-specific duration. Temperature followed ambient photoperiod with temperature reaching up to 39°C during the day and 29°C during the night. Saplings were watered every day to saturation and relative humidity was around 90\% to avoid cooling by transpiration. 
 	
-		\begin{figure}[H]git 
-		\centering
-		\includegraphics[width=0.9\textwidth]{design.pdf} 
-		\caption{Effect size in g of biomass compared to control sapling when exposed to an extended growing season (GS\_extend), heat, defoliation or drought event. Colors represent the six study species. }
-		\label{fig:fig_1xxx}
-	\end{figure}
+
 	
 	\subsection*{Phenological monitoring}
 		\textit{Leaf emergence} \\
@@ -203,7 +204,7 @@ To track radial growth, magnetic dendrometers were installed that were designed 
 
 	\subsection*{Biomass assessment}
 	Before budburst and after the growing season we measured diameter c. 2 cm above plant collar (digital calliper; accuracy ±0.1mm) and height (graduated pole; accuracy ±1mm) of each sapling. Total above-ground biomass was estimated following allometric equations provided by \citet{annighoferSpeciesspecificGenericBiomass2016}. Substracting before from after season estimates revealed the calculated above-ground biomass increment.	\\
-After entering full dormancy, all saplings were removed from pots in December 2023 to wash off the potting substrate. Whole saplings where dried at 80° C for 48h before tissue was separated into roots and shoots with the latter being further sorted into current year and past years tissue. All partial quantities were weighted with an accuracy of ±0.01g.\\
+After entering full dormancy, all saplings were removed from pots in December 2023 to wash off the potting substrate. Whole saplings where dried at 80° C for 48h before tissue was separated into roots and shoots with the latter being further sorted into current year and past years tissue. All partial quantities were weighted to an accuracy of ±0.01g.\\ %Scout Pro
 
 	\subsection*{Wood anatomy}
 Prior to every drought and defoliation event, 10 replicates were pinned at a homogenous stem section at the base using a needle and dyed with ethylene blue \citep{gartnerCambialActivityMoringa2021a}. This pinning hole acted as a `marker in time' that allowed to separate wood formation before and after treatment start. During harvest at the end of the growing season, a 2cm section containing the pinning hole was cut using an electric saw and stored in 35\% ethanol solution. \\
@@ -214,17 +215,32 @@ C. four stem sections per replicate were cut using a microtome (semi-automated L
 	
 	\section*{Preliminary results}
 	
+	Preliminary results indicate that early successional tree species are more affected by defoliation and drought events than late successional species. Defoliation and particularly late drought events substantially reduced their total biomass accumulation compared to control saplings. This finding is surprising since pioneer species can be expected to be more plastic and may cope better with stress. However, many early successional species pursue an indeterminate growth strategy. This means that only a small fraction of their leaf and stem tissue was already preformed and overwintered in buds. Consequently, they rely on conditions in the current year to form new tissue (neogrowth atop preformed tissue) which make them more sensitive to current year conditions. The degree of determinism defines how much a tree species invests already into next years growth. With increasing frequency of stress events but also with the potential of extending the growing season length this trait seems to be crucial for our mechanistic understanding of how trees will respond in a future climate
+	
+		\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.9\textwidth]{design.pdf} 
+		\caption{Daily mean (solid black line) and min/max (shaded area) temperature as well as photoperiod at the experimental site at UBC. Temperature during the three drought treatments are shown in yellow, orange and red. Arrows indicate defoliation events.}
+		\label{fig:fig_1xxx}
+	\end{figure}
+	
+			\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.9\textwidth]{dendrometer_graph.pdf} 
+		\caption{Left: Newly developed magnetic dendrometer (at the stem base) were used to monitor radial growth in a 15 min interval. Their performance was compared to classical point dendrometers (upper part of the stem). Right: Example of the changes in stem diameter of a Bigleaf maple sapling during a drought treatment and subsequent recovery phase.}
+		\label{fig:fig_1xxx}
+	\end{figure}
 	
 	
-	\begin{figure}
+	\begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\textwidth]{posteriors/biomass_post_solst_treat_sub.pdf} 
-	\caption{Effect size in g of biomass compared to control sapling when exposed to an extended growing season (GS\_extend), heat, defoliation or drought event. Colors represent the six study species. }
+	\includegraphics[width=0.9\textwidth]{biomass_post_solst_treat_sub.pdf} 
+	\caption{Effect size in g of biomass compared to control sapling when exposed to an extended growing season (GS\_extend), heat, defoliation or drought event. Colors represent the six study species.}
 	\label{fig:fig_1xxx}
 \end{figure}
 	
 	
-			\begin{figure}
+			\begin{figure}[H]
 		\centering
 		\includegraphics[width=0.9\textwidth]{shoot_elongation copy.pdf} 
 		\caption{Shoot extension over the growing season 2023 for the six study species. Note the species-specific differences in absolute growth and in growth phenology with Quercus stopping first and Sequoia elongating until the very end of the season.}
@@ -232,63 +248,32 @@ C. four stem sections per replicate were cut using a microtome (semi-automated L
 	\end{figure}
 	
 	
-				\begin{figure}
+				\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.9\textwidth]{posteriors/biomass_post_treat_sub.pdf} 
+		\includegraphics[width=0.9\textwidth]{biomass_post_treat_sub.pdf} 
 		\caption{Effect size in g of biomass compared to control sapling when exposed to defoliation or drought treatments on 3 occasions. Colors represent the six study species.}
 		\label{fig:fig_1xxx}
 	\end{figure}
 	
 	
 	
-	
-
-	
-
-	
-	//update this section//
-	
-	Climate chambers temperature and humidity
-	We set the climate chambers to identical conditions for all drought treatments. The night temperature was set at 20 °C and the day temperature was set to 30 °C. These temperatures rose and fell at the same time every day, which corresponds to the time of sunrise and sunset at Vancouver’s summer solstice (i.e. 16h and 15min). The photoperiod was adjusted weekly, to the current ambient sunrise and sunset time. Hence.  //should we add the date at which they were added?//. Indeed, if one growth chamber has a higher relative humidity than another, the plants in this one would reach the wilting point later than the others. 
-	
-
-	
-	
-	\subsection*{Defoliation treatments}
-	Two defoliation treatments were applied at the same time during the summer, one that started on May 16th, and the second, on June 23rd. Those treatments were designed to mimic a net loss of leaf area induced by either browsing, spring frost or drought. 
-	
-	Timing:
-	•	We conducted the first defoliation treatment once the leaves from most of the replicates of one species have reached the fourth phenological stage. This stage was reached at different times, depending on the species, therefore, the start of this treatment was species-specific. 
-	•	The second defoliation treatment was conducted after the theoretical peak growth period that happens around summer solstice. At that time, all species have reached the fourth phenological stage. 
-	
-	Defoliation:
-	Deciduous trees 
-	Using pruning snips (Fiskars Garden), we cut all the leaves mid petiole that were at phenological stage 4. We selected this technique which was in several studies (Miller Tworkoski, 2010; Nzima, Martin, Nishijima, 1999).Younger stages were left intact to not accidentally damage the terminal meristem. In the following two weeks we continuously cut all newly emerging leaves reaching stage 4 to suspend all assimilate supply.
-	
-	Evergreen (Pinus)
-	All one-year-old and older mature needles were removed by hand by tearing them delicately in the direction of the apex to not hurt the bark as mentioned in (O’Neil, 2011). The current year needles were preserved in the first defoliation treatment since they were less than 1cm in length and still developing. In the second treatment we additionally defoliated c. ¾ of the current-year needles which were still not fully elongated but presumably contributed already most to the total photosynthetic assimilation.
-	//I think we should mention here the weight of the leaves we removed. Perhaps we make a table out of that. //
-	
-	Drying:
-	All the leaves collected were gathered in brown paper bags, where all the replicates from the same species were put together to dry. The leaves were dried for 48 hours at 70°C in a drying oven (VWR 1645D). Dry matter biomass was measured with scale (Scout Pro) to an accuracy of two decimal places (0.00 grams).
-	
-	\subsection*{Soil moisture measurements}
-	Everyday, at the same time, the volumetric water content (VWC) was measured using a soil moisture meter (Fieldscout TDR 150). The rod length was changed depending on the pot depth that varied for different species (i.e. …). One was 12.2 cm and the other was 20.32 cm. In addition, and for a more integrated indicator of soil water loss especially near the wilting point, whole pots were weighted using a scale (REF) to an accuracy of 1 gram. To avoid noise in the radial monitoring data, replicates equipped with magnetic dendrometers were only weighted at the start and end of the drought treatments. Since VWC and weight loss yielded a strong correlation (Fig SX) whole VWC curves were calculated also for these replicates.
-	
-	
-	
-	
-	
-	\begin{figure}
+				\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.9\textwidth]{biomass_tot_Acma.pdf} 
-		\caption{xxxxxxxxxxx}
+		\includegraphics[width=0.9\textwidth]{pinning_overview_2.pdf} 
+		\caption{Left: stem section cut with an electrical saw close to the marked pinning hole. Right: 15\textmu m cross-section of \textit{Betula papyrifera} double stained with Astrablue and Safranin. Pinning holes are indicated with the arrow}
 		\label{fig:fig_1xxx}
 	\end{figure}
 	
+					\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.9\textwidth]{pinning_closup_x.jpg} 
+		\caption{Cross-section of \textit{Quercus garryana} depicting the reaction caused by the pinning. A: pinning hole with bark and phloem cells; B: zone of irritated cambial cells surrounding the pinning hole (callose tissue); C: border of cambium at the time of pinning; D: Pinning hole penetrating into the xylem cells that were already formed at the time of pinning; E: xylem cells formed prior to pinning; F: xylem cells formed after pinning. }
+		\label{fig:fig_1xxx}
+	\end{figure}
+
 	
 	
-	\section*{stuff I did't find place yet}
+	%\section*{stuff I did't find place yet}
 	
 	
 	\newpage
