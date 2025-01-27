@@ -45,6 +45,7 @@
 %\fancyhead[LO]{Frederik Baumgarten}
 %\fancyhead[RO]{Research Proposal}
 % more optionals! %
+\usepackage{booktabs} %clean and professional look for tables
 
 \graphicspath{ {/Users/frederik/github/PhaenoFlex_clean/analysis/output/} }% tell latex where to find figures 
 
@@ -65,7 +66,25 @@
 	\subsection*{Study species and study site}
 	3 year-old saplings of 6 species, each representing a different family were selected to get a wide range of possible tree responses including coniferous evergreen and broad leaved deciduous species. All species selected occur naturally along the Pacific west coast of USA and Canada. The studied deciduous trees were Prunus virginiana L., Acer macrophyllum Pursh., Betula papyfera Marsh. and Quercus garryana Dougl.; evergreen trees were Pinus contorta Dougl., and Sequoia sempervirens (D. Don) Endl. In the following we refer to their genus name only.
 	
-	The study was conducted on the campus of the University of British Columbia (Totem Field; 49.2572 N, -123.2503 E) located in the oceanic climate of Vancouver. 
+			\begin{table}[H]
+		\centering
+		\caption{Species information}
+		\begin{tabular}{p{5.8cm} p{2cm} p{2.0cm} p{1.0cm} p{3cm}}
+			\toprule
+			\textbf{Species name} & \textbf{Family} & \textbf{Initial height} & \textbf{drought tolerance} & \textbf{remarks} \\
+			\midrule
+			\textit{Prunus virginiana L.} & Rosaceae & x & x &  x  \\
+			\textit{Acer macrophyllum Pursh.} & Sapindaceae & x & x & x \\
+			\textit{Betula papyfera Marsh.} & Betulaceae &x & x & x \\
+			\textit{Quercus garryana Dougl.} & Fagaceae & x & x & x \\
+			\textit{Pinus contorta Dougl.} & Pinaceae & x & x &  x\\
+			\textit{Sequoia sempervirens (D. Don) Endl.} & Cupressaceae & x & x & x \\
+			
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	The study was conducted on the campus of the University of British Columbia (Totem Field; 49.2572 N, -123.2503 E) located in Vancouver, Canada. The climate is oceanic characterized by the proximity of the Pacific with a mean annual temperature around 10°C (18°C in July and 4°C in January). Together with an annual precipitation of c. 1500mm this climate supports a typical temperate rain forest along the west coast.
 	
 	\subsection*{Experimental setup}
 		
@@ -87,6 +106,7 @@
 	
 	\textit{Defoliation treatments} \\
 	The defoliation treatments were intended to simulate leaf loss due to frost, browsing, hail or overheating. As these scenarios cause different physiological reactions (e.g. release of defence substances), we cut off each fully unfolded leaf (stage 4) halfway up the petiole using pruning scissors. Younger stages were left intact to prevent accidental damage to the meristem. The leaf area was reduced to 0\% for all deciduous species. For pines, all needles older than 1 year were removed by hand by tearing them delicately in the direction of the apex. The current year needles were preserved in the first defoliation treatment since they were less than 1cm in length and still developing. In the second and third defoliation event c. ¾ of the current-year needles were removed, which presumably contributed already most to the total photosynthetic assimilation. All defoliation events coincided with the start of the respective drought treatments, i.e. the first defoliation took place on the same day as the start of the first drought treatment. In the following two weeks we continuously cut all newly emerging leaves reaching stage 4 to suspend all assimilate supply. %mention here the weight of the leaves	All the leaves collected were gathered in brown paper bags, where all the replicates from the same species were put together to dry. The leaves were dried for 48 hours at 70°C in a drying oven (VWR 1645D). Dry matter biomass was measured with scale (Scout Pro) to an accuracy of two decimal places (0.00 grams).
+	Subsequent recovery of saplings was assessed by eye as the percentage of recovering leaf area compared to a control sapling. 
 	
 	
 	
@@ -100,15 +120,72 @@
 	
 	\subsection*{Phenological monitoring}
 		\textit{Leaf emergence} \\
+	Bud development in spring was assessed by the same observer twice a week starting 24 April 2023 using a categorical scale depending on species. Deciduous species were scored on a four-stage scale (see \citep{vitasseElevationalAdaptationPlasticity2013a}): stage 0 - dormant, stage 1 - bud swelling, stage 2 - bud burst, stage 3 - leaf-out and stage 4 - leaf unfolded. Pine saplings were scored differently as follows: stage 1 - swelling or elongation of shoot visible, stage 2 - green needle tips along the shoot visible, stage 3 - scales open along the shoot and first needles become visible, stage 4 - green needles emerging away from the shoot. Phenostages for Sequoia were limited to two stages because this species does not form buds: stage 1 - first signs of needles visible at the apical meristem but all bended inwards towards the center, stage 2 - needles start to grow and bend outwards from the center.
+	For all species and saplings the day of year was recorded as soon as 50\% of all buds reached the newest stage. \\
 	
 		\textit{Bud set} \\
+		Cessation of bud development was monitored starting in early July 2023 until the apical bud was dormant. Bud set was generally scored on a four-stage score as follows: stage 3 - ongoing shoot growth/elongation, stage 2 - apical bud forms and remains as a light-green bud with the last (pair) of leaves remaining small, stage 1 - first bud scales appear, stage 0 - bud turns dark red/brown and hardens. In Acer only stages 3, 2 and 0 were distinguished and recorded. Bud set of Pinus and Sequoia were not monitored, since shoot elongation was the best activity proxy of the shoot apical meristem.\\
 		
 		\textit{Leaf senescence} \\
+		Leaf senescence was monitored in weekly intervals between 1 Sept 2023 and 4 Nov 2023 i.e. until all leaves were shed. For each sapling and at every monitoring occasion the chlorophyll content was estimated using a leaf spectral index (LSI; mean of three representative leaves per replicate; MC-100, apogee instruments). Following  \citep{zohner} this value was weighted by simultaneous estimates of the percentage of remaining green leaves (by eye; 100\%=all leaves remaining; 0\%=all leaves shed). For example, a sapling with 50\% remaining leaves and a mean LSI of 10 was rated with a total LSI of 10 (0.5 * 20). A sapling was considered senescent one a value was below 50\% of the maximum LSI value. \\
+		%In addition, light curves, Amax measurements
+		
+		
+		
 			
+\begin{table}[H]
+	\captionsetup{justification=raggedright, singlelinecheck=false} % Left-align caption
+	\centering
+	\caption{Phenological stages used for all deciduous species \citep{vitasseElevationalAdaptationPlasticity2013a}, pine as well as Sequoia}
+	\begin{tabular}{p{2.4cm} p{1cm} p{2.5cm} p{8.0cm}} % Make sure the formatting is correct
+		\toprule
+		\textbf{Group} & \textbf{Scale} & \textbf{Phenostage} & \textbf{Description} \\
+		\midrule
+		
+		\multicolumn{4}{l}{\textit{Deciduous species}} \\
+		& 0 & dormant & no bud development visible \\
+		& 1 & bud swelling & swollen and/or elongating buds \\
+		& 2 & budburst & bud scales open and leaves partially visible \\
+		& 3 & leaf-out & leaves fully emerged from bud but still folded, crinkled or pendant \\
+		& 4 & leaf unfolding & leaves fully unfolded \\
+		\midrule
+		
+		\multicolumn{4}{l}{\textit{Pine}} \\
+		& 0 & dormant & no signs of activity \\
+		& 1 & swelling & swelling or elongation of shoot visible \\
+		& 2 & budburst & green needle tips along the shoot visible \\
+		& 3 & leaf-out & scales open along the shoot and first needles become visible \\
+		& 4 & leaf-unfolding & green needles emerging away from the shoot \\
+		\midrule
+		
+		\multicolumn{4}{l}{\textit{Sequoia}} \\
+		& 1 & not active & first signs of needles visible at the apical meristem but all bent inwards towards the center \\
+		& 2 & active & needles start to grow and bend outwards from the center \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+
 			
 	\subsection*{Soil moisture measurements}
-Everyday, at the same time, the volumetric water content (VWC) was measured using a soil moisture meter (Fieldscout TDR 150). The rod length was changed depending on the pot depth that varied for different species (i.e. …). One was 12.2 cm and the other was 20.32 cm. In addition, and for a more integrated indicator of soil water loss especially near the wilting point, whole pots were weighted using a scale (REF) to an accuracy of 1 gram. To avoid noise in the radial monitoring data, replicates equipped with magnetic dendrometers were only weighted at the start and end of the drought treatments. Since VWC and weight loss yielded a strong correlation (Fig SX) whole VWC curves were calculated also for these replicates.
+Everyday, at the same time, the volumetric water content (VWC) was measured using a soil moisture meter (Fieldscout TDR 150). The rod length was changed depending on the pot depth that varied for different species (i.e. …). One was 12.2 cm and the other was 20.32 cm. In addition, and for a more integrated indicator of soil water loss especially near the wilting point, whole pots were weighted using a scale (REF) to an accuracy of 1g. To avoid noise in the radial monitoring data, replicates equipped with magnetic dendrometers were only weighted at the start and end of the drought treatments. %Since VWC and weight loss yielded a strong correlation (Fig SX) whole VWC curves were calculated also for these replicates.\\
 
+	\subsection*{Shoot apical growth}
+	Shoot growth activity of the apical meristem was measured on 10 replicates per treatment throughout the season in biweekly intervals. Water resistant measuring tapes were attached to the stem base under the terminal bud after budburst and subsequent shoot elongation was tracked on the tape.  \\
+
+	\subsection*{Radial growth and tree-water deficit}
+To track radial growth, magnetic dendrometers were installed that were designed to not injure the bark during installation and operate without friction \citep{clonchHighPrecisionZerofriction2021}. Devices were installed at the stem base avoiding branches and abnormalities using breathable bandage material (). Five control replicates were equipped permanently while drought treatments swiched devices so that five replicates of every drought timing captured diameter fluctuations 1 week prior, during and 2 weeks after the respective drought treatment. \\
+
+	\subsection*{Biomass assessment}
+	Before budburst and after the growing season we measured diameter c. 2 cm above plant collar (digital calliper; accuracy ±0.1mm) and height (graduated pole; accuracy ±1mm) of each sapling. Total above-ground biomass was estimated following allometric equations provided by \citet{annighoferSpeciesspecificGenericBiomass2016}. Substracting before from after season estimates revealed the calculated above-ground biomass increment.	\\
+After entering full dormancy, all saplings were removed from pots in December 2023 to wash off the potting substrate. Whole saplings where dried at 80° C for 48h before tissue was separated into roots and shoots with the latter being further sorted into current year and past years tissue. All partial quantities were weighted with an accuracy of ±0.01g.\\
+
+	\subsection*{Wood anatomy}
+Prior to every drought and defoliation event, 10 replicates were pinned at a homogenous stem section at the base using a needle and dyed with ethylene blue \citep{gartnerCambialActivityMoringa2021a}. This pinning hole acted as a `marker in time' that allowed to separate wood formation before and after treatment start. During harvest at the end of the growing season, a 2cm section containing the pinning hole was cut using an electric saw and stored in 35\% ethanol solution. \\
+C. four stem sections per replicate were cut using a microtome (semi-automated Lab-microtome, WSL; thickness: 15\textmu m) to ensure the visiblilty of the anatomical structure around the pinning hole. Sections were double stained with Safranin (to color lignified structures red) and Astrablue (to color unlignified structures blue) following standard protocol \citep{gartnerMicroscopicPreparationTechniques2013}. Sampled where then fixed using UV-sensitive mounting medium (Eukitt UV, Fisher scientific) and dried under a commercial nail dryer UV-lamp for c. two minutes. Samples where then scanned with a slide scanner () and then processed with xxxx.
+
+	\subsection*{Data analysis and statistics}
+	
 	
 	\section*{Preliminary results}
 	
@@ -219,7 +296,7 @@ Everyday, at the same time, the volumetric water content (VWC) was measured usin
 	\newpage
 	
 	
-	\bibliography{Art_simulation}
+	\bibliography{refs_PhaenFlex}
 	\bibliographystyle{ecolett}
 	
 	
