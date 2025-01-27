@@ -4,6 +4,7 @@
 *.blg
 *.out
 *.aux
+*.bcf
 *.Rdata
 *.RData
 *.Rda

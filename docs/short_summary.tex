@@ -5,6 +5,7 @@
 \usepackage{Sweave}
 \usepackage{graphicx}
 \usepackage{natbib}
+%\usepackage{biblatex}
 \usepackage{amsmath}
 \usepackage{textcomp}%among other things, it allows degrees C to be added
 \usepackage{float}
@@ -50,7 +51,7 @@
 \graphicspath{ {/Users/frederik/github/PhaenoFlex_clean/analysis/output/} }% tell latex where to find figures 
 
 \begin{document}
-	\renewcommand{\bibname}{References}%names reference list 
+%	\renewcommand{\bibname}{References}%names reference list 
 	
 	
 	%	\title{
@@ -64,7 +65,7 @@
 	
 	\section*{Methods}
 	\subsection*{Study species and study site}
-	3 year-old saplings of 6 species, each representing a different family were selected to get a wide range of possible tree responses including coniferous evergreen and broad leaved deciduous species. All species selected occur naturally along the Pacific west coast of USA and Canada. The studied deciduous trees were Prunus virginiana L., Acer macrophyllum Pursh., Betula papyfera Marsh. and Quercus garryana Dougl.; evergreen trees were Pinus contorta Dougl., and Sequoia sempervirens (D. Don) Endl. In the following we refer to their genus name only.
+	3 year-old saplings of 6 species, each representing a different family were selected to get a wide range of possible tree responses including coniferous evergreen and broad leaved deciduous species. All species selected occur naturally along the Pacific west coast of USA and Canada. The studied deciduous trees were \textit{Prunus virginiana} L., \textit{Acer macrophyllum} Pursh., \textit{Betula papyfera} Marsh. and \textit{Quercus garryana} Dougl.; evergreen trees were \textit{Pinus contorta} Dougl., and \textit{Sequoia sempervirens} (D. Don) Endl. In the following we refer to their genus name only.
 	
 			\begin{table}[H]
 		\centering
@@ -84,6 +85,28 @@
 		\end{tabular}
 	\end{table}
 	
+	
+	%	\begin{table}[h!]
+	%	\begin{center}
+		%	\caption{Details of saplings origin }
+		%	\label{tab:table1}
+		%	\begin{tabular}{l|c|r} % 
+			%	\textbf{Species} & \textbf{Nursery} & \textbf{Seed origin}\\
+				%$\alpha$ & $\beta$ & $\gamma$ \\
+			%	\hline
+			%	Prunus virginiana L. & Peel's Nurseries Ltd. & BC Canada\\
+			%	Acer macrophyllum Pursh. & Streamside Native Plants & BC Canada\\
+			%	Betula papyfera Marsh. & Peel's Nurseries Ltd. &BC Canadac\\
+			%	Quercus garryana ?.& Peel's Nurseries Ltd. & BC Canada\\
+			%	Populus trichocarpa Torr. & Peel's Nurseries Ltd.& BC Canada\\
+			%	Pinus contorta, Dougl. & Tree Time Services Inc & Alberta Canada\\
+			%	Sequoia sempervirens(D. Don)&? & California\\
+				
+			%\end{tabular}
+		%\end{center}
+	%\end{table}
+	
+	
 	The study was conducted on the campus of the University of British Columbia (Totem Field; 49.2572 N, -123.2503 E) located in Vancouver, Canada. The climate is oceanic characterized by the proximity of the Pacific with a mean annual temperature around 10°C (18°C in July and 4°C in January). Together with an annual precipitation of c. 1500mm this climate supports a typical temperate rain forest along the west coast.
 	
 	\subsection*{Experimental setup}
@@ -97,21 +120,23 @@
 	The whole study design is depicted in Fig. \ref{fig:fig_1xxx} for an overview. Saplings were subjected to a) a growing season extension, b) one out of 3 drought timings, c) one out of 3 defoliation events and d) a heat event, resulting in eight treatments plus control. 15 replicates were randomly assigned to each treatment (8 treatments plus control à 15 replicates = 135 saplings/species). \\  
 	
 	\textit{Growing season extension} \\
-	Growing season extension were achieved by prolonging dormancy of all other treatments for a month (see above). This resulted in an acculuation of xxx growing degree days (GDD) that advanced budburst by X to Y days (depending on species, see XX).\\
+	Growing season extensions were achieved by prolonging dormancy of all other treatments for a month (see above). Hence sampling of this treatment accumulated xxx more growing degree days (GDD) by being exposed to ambient conditions. Depending on species this `warming' advanced budburst by X to Y days (see XX).\\
 	
 	\textit{Drought treatments} \\
 	Drought treatments were conducted in climate chambers (TPC-19, Biochambers; Canada) at close proximity to the experimental site (Faculty of Forestry, UBC). Drought conditions were simulated with temperatures set to 30°C during the day and 20°C at night. These temperatures rose and fell at the same time every day, corresponding to the photoperiod at Vancouver’s summer solstice (i.e. photoperiod: 16h and 15min). The photoperiod was adjusted weekly, to the current ambient sunrise and sunset time. 
 	The first drought treatment started species-specific once leaf-out reached stage 4 (i.e. leaves fully unfolded). Second and third drought treatment were started on a fixed date, namely 23 June and 31 July 2023. Subsequent drying of the pots was monitored by measuring whole pot weight (balance accuracy 0.1g) as well as volumetric water content (VWC, Fieldscout TDR 150). Saplings were released from drought stress on species-specific dates, marked by the first signs of desiccation, such as curled or discolored leaves, and soil moisture levels approaching the wilting point. %for several days...curves? or even argue with poor recovery during the night of stem diameter 
 	Saplings were again weighted under field capacity and then transferred back to the experimental site and plugged into the irrigation system. \\
 	
+	%For the first drought treatment dehumidifiers (Toshiba TDDP2213ES2) were set in the climate chambers at a set humidity of 35%, in order to avoid relative humidity differences that could affect the tree’s transpiration rate
+	
 	\textit{Defoliation treatments} \\
 	The defoliation treatments were intended to simulate leaf loss due to frost, browsing, hail or overheating. As these scenarios cause different physiological reactions (e.g. release of defence substances), we cut off each fully unfolded leaf (stage 4) halfway up the petiole using pruning scissors. Younger stages were left intact to prevent accidental damage to the meristem. The leaf area was reduced to 0\% for all deciduous species. For pines, all needles older than 1 year were removed by hand by tearing them delicately in the direction of the apex. The current year needles were preserved in the first defoliation treatment since they were less than 1cm in length and still developing. In the second and third defoliation event c. ¾ of the current-year needles were removed, which presumably contributed already most to the total photosynthetic assimilation. All defoliation events coincided with the start of the respective drought treatments, i.e. the first defoliation took place on the same day as the start of the first drought treatment. In the following two weeks we continuously cut all newly emerging leaves reaching stage 4 to suspend all assimilate supply. %mention here the weight of the leaves	All the leaves collected were gathered in brown paper bags, where all the replicates from the same species were put together to dry. The leaves were dried for 48 hours at 70°C in a drying oven (VWR 1645D). Dry matter biomass was measured with scale (Scout Pro) to an accuracy of two decimal places (0.00 grams).
-	Subsequent recovery of saplings was assessed by eye as the percentage of recovering leaf area compared to a control sapling. 
+	Subsequent recovery of saplings was assessed by eye as the percentage of recovering leaf area compared to a control sapling. \\
 	
+	\textit{Heat treatment} \\
+	The simulated heat wave (walk in climate chamber, LTRB, BioChambers) aimed to bring saplings to their upper temperature threshold where growth and photosynthesis ceases. The treatment started together with the second drought timing (23 June) and lasted the same species-specific duration. Temperature followed ambient photoperiod with temperature reaching up to 39°C during the day and 29°C during the night. Saplings were watered every day to saturation and relative humidity was around 90\% to avoid cooling by transpiration. 
 	
-	
-	
-		\begin{figure}[H]
+		\begin{figure}[H]git 
 		\centering
 		\includegraphics[width=0.9\textwidth]{design.pdf} 
 		\caption{Effect size in g of biomass compared to control sapling when exposed to an extended growing season (GS\_extend), heat, defoliation or drought event. Colors represent the six study species. }
@@ -168,13 +193,13 @@
 
 			
 	\subsection*{Soil moisture measurements}
-Everyday, at the same time, the volumetric water content (VWC) was measured using a soil moisture meter (Fieldscout TDR 150). The rod length was changed depending on the pot depth that varied for different species (i.e. …). One was 12.2 cm and the other was 20.32 cm. In addition, and for a more integrated indicator of soil water loss especially near the wilting point, whole pots were weighted using a scale (REF) to an accuracy of 1g. To avoid noise in the radial monitoring data, replicates equipped with magnetic dendrometers were only weighted at the start and end of the drought treatments. %Since VWC and weight loss yielded a strong correlation (Fig SX) whole VWC curves were calculated also for these replicates.\\
+Soil drying during drought treatments was documented with daily volumetric water content (VWC) measurements using a soil moisture meter (Fieldscout TDR 150; rod length 12cm or 20cm for small or large pots, respectively). In addition, and for a more integrated indicator of soil water loss near the wilting point, whole pots were weighted using a scale (accuracy ±1g). Replicates equipped with magnetic dendrometers were weighted at the start and end of the drought treatments only.  %Since VWC and weight loss yielded a strong correlation (Fig SX) whole VWC curves were calculated also for these replicates.\\
 
 	\subsection*{Shoot apical growth}
 	Shoot growth activity of the apical meristem was measured on 10 replicates per treatment throughout the season in biweekly intervals. Water resistant measuring tapes were attached to the stem base under the terminal bud after budburst and subsequent shoot elongation was tracked on the tape.  \\
 
 	\subsection*{Radial growth and tree-water deficit}
-To track radial growth, magnetic dendrometers were installed that were designed to not injure the bark during installation and operate without friction \citep{clonchHighPrecisionZerofriction2021}. Devices were installed at the stem base avoiding branches and abnormalities using breathable bandage material (). Five control replicates were equipped permanently while drought treatments swiched devices so that five replicates of every drought timing captured diameter fluctuations 1 week prior, during and 2 weeks after the respective drought treatment. \\
+To track radial growth, magnetic dendrometers were installed that were designed to not injure the bark during installation and operate without friction \citep{clonchHighPrecisionZerofriction2021}. Devices were installed at the stem base avoiding branches and abnormalities using breathable bandage material (). Five control replicates were equipped permanently while drought treatments swiched devices so that five replicates of every drought timing captured diameter fluctuations 1 week prior, during and 2 weeks after the respective drought treatment. \\ % mention Swiss dendrometers to check reliability and accuracy
 
 	\subsection*{Biomass assessment}
 	Before budburst and after the growing season we measured diameter c. 2 cm above plant collar (digital calliper; accuracy ±0.1mm) and height (graduated pole; accuracy ±1mm) of each sapling. Total above-ground biomass was estimated following allometric equations provided by \citet{annighoferSpeciesspecificGenericBiomass2016}. Substracting before from after season estimates revealed the calculated above-ground biomass increment.	\\
@@ -188,6 +213,7 @@ C. four stem sections per replicate were cut using a microtome (semi-automated L
 	
 	
 	\section*{Preliminary results}
+	
 	
 	
 	\begin{figure}
@@ -216,44 +242,16 @@ C. four stem sections per replicate were cut using a microtome (semi-automated L
 	
 	
 	
-	\begin{table}[h!]
-		\begin{center}
-			\caption{Details of saplings origin }
-			\label{tab:table1}
-			\begin{tabular}{l|c|r} % 
-				\textbf{Species} & \textbf{Nursery} & \textbf{Seed origin}\\
-				%$\alpha$ & $\beta$ & $\gamma$ \\
-				\hline
-				Prunus virginiana L. & Peel's Nurseries Ltd. & BC Canada\\
-				Acer macrophyllum Pursh. & Streamside Native Plants & BC Canada\\
-				Betula papyfera Marsh. & Peel's Nurseries Ltd. &BC Canadac\\
-				Quercus garryana ?.& Peel's Nurseries Ltd. & BC Canada\\
-				Populus trichocarpa Torr. & Peel's Nurseries Ltd.& BC Canada\\
-				Pinus contorta, Dougl. & Tree Time Services Inc & Alberta Canada\\
-				Sequoia sempervirens(D. Don)&? & California\\
-				
-			\end{tabular}
-		\end{center}
-	\end{table}
+
 	
-	\subsection*{Drought treatments}
-	//move here the general timings and explanations as this is the main treatment//
+
 	
-	Dendrometer installation //could you provide information on the software, location where they were build, etc.// 
-	Once all the trees were in their respective blocks and drip irrigation installed, we set up the dendrometers on the control replicates and the first drought treatment replicates. 
-	//reminder: tape //
-	
-	Swiss dendrometers
 	//update this section//
 	
 	Climate chambers temperature and humidity
-	We set the climate chambers to identical conditions for all drought treatments. The night temperature was set at 20 °C and the day temperature was set to 30 °C. These temperatures rose and fell at the same time every day, which corresponds to the time of sunrise and sunset at Vancouver’s summer solstice (i.e. 16h and 15min). The photoperiod was adjusted weekly, to the current ambient sunrise and sunset time. Hence. Four climate chambers from *** and one walk in chamber from *** were used and all of them are located in UBC’S Faculty of Forestry’s basement. For the first drought treatment dehumidifiers (Toshiba TDDP2213ES2) were set in the climate chambers at a set humidity of 35%, in order to avoid relative humidity differences that could affect the tree’s transpiration rate //should we add the date at which they were added?//. Indeed, if one growth chamber has a higher relative humidity than another, the plants in this one would reach the wilting point later than the others. 
+	We set the climate chambers to identical conditions for all drought treatments. The night temperature was set at 20 °C and the day temperature was set to 30 °C. These temperatures rose and fell at the same time every day, which corresponds to the time of sunrise and sunset at Vancouver’s summer solstice (i.e. 16h and 15min). The photoperiod was adjusted weekly, to the current ambient sunrise and sunset time. Hence.  //should we add the date at which they were added?//. Indeed, if one growth chamber has a higher relative humidity than another, the plants in this one would reach the wilting point later than the others. 
 	
-	Dro 1 start decision:
-	The first drought treatment started species-specific once leaf-out reached stage 4 (i.e. leaves fully unfolded). Specifically, the plants were moved to climate chambers () where they experienced 30 °C. during the day and 20 °C. during the night. While temperature cycles were constant across all four drought treatments to ensure comparability, the photoperiod followed ambient conditions, between treatments The trees were left to dry in the chambers for different periods depending on the species. For the first drought treatment, we removed the trees once one replicate from a species showed drought stress morphological symptoms. We assumed that at least one replicate reached their species’ wilting point. The removal decision was made on a species-specific basis and was arbitrary, as we observed distinct variations in the speed of symptom manifestation and their severity among individuals within the replicates of a single species. To avoid high mortality rate, we decided to remove all the replicates once one showed severe desiccation symptoms. The trees were then removed from the climate chambers, saturated with water, and reintroduced in the field, where they were reconnected to the irrigation system. Dendrometers were kept on these replicates for a minimum period of two weeks to monitor radial growth following this drought treatment. After this, the dendrometers were placed on the second drought treatment replicates for 5 to 7 days which allowed us to monitor radial growth prior to their shift in the climate chambers.
-	
-	Dro 2, 3, 4 start decision
-	The replicates selected for the following drought treatments were all moved at the same time. The decision of removal for the second drought treatment was slightly different. Since we had access to the rate of water loss and the VWC at which the replicates from the first drought treatment reached their wilting point, we included these factors in the decision process. // Should we mention the decision steps we discussed. Would a simple figure be a good idea for this // Once all the replicates were removed from the climate chambers, they stayed in the field for two weeks for radial monitoring, then the dendrometers were set for the following drought treatment //(idem for dro1, 2, 3, 4, how could we avoid repetition?//
+
 	
 	
 	\subsection*{Defoliation treatments}
@@ -296,7 +294,7 @@ C. four stem sections per replicate were cut using a microtome (semi-automated L
 	\newpage
 	
 	
-	\bibliography{refs_PhaenFlex}
+	\bibliography{refs_phaenoflex}
 	\bibliographystyle{ecolett}
 	
 	
