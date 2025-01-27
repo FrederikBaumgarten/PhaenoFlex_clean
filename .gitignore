@@ -15,6 +15,7 @@
 *.Rapp.history
 *Rplots.pdf
 *.DS_Store
+*.pptx
 ~$*.xlsx
 ~$*.pptx
 /notposting
