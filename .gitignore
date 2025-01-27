@@ -5,6 +5,7 @@
 *.out
 *.aux
 *.bcf
+*.run.xml
 *.Rdata
 *.RData
 *.Rda
